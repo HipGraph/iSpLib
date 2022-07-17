@@ -5,7 +5,7 @@ import os.path as osp
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.data import Data
 from torch_geometric.io import read_txt_array

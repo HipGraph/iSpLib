@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import torch
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.loader import NeighborLoader
@@ -258,7 +258,7 @@ def test_heterogeneous_neighbor_loader_on_cora(get_dataset, directed):
     assert torch.allclose(out1, out2, atol=1e-6)
 
 
-@withRegisteredOp('torch_sparse.hetero_temporal_neighbor_sample')
+@withRegisteredOp('the_sparse_package.hetero_temporal_neighbor_sample')
 def test_temporal_heterogeneous_neighbor_loader_on_cora(get_dataset):
     dataset = get_dataset(name='Cora')
     data = dataset[0]

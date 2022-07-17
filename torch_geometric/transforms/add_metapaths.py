@@ -1,7 +1,7 @@
 from typing import List
 
 import torch
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import HeteroData
 from torch_geometric.data.datapipes import functional_transform

@@ -3,7 +3,7 @@ from typing import Callable, Optional, Tuple, Union
 
 from torch import Tensor
 from torch.nn import ModuleList, ReLU
-from torch_sparse import SparseTensor, masked_select_nnz
+from the_sparse_package import SparseTensor, masked_select_nnz
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

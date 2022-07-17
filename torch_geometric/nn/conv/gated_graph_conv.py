@@ -1,7 +1,7 @@
 import torch
 from torch import Tensor
 from torch.nn import Parameter as Param
-from torch_sparse import SparseTensor, matmul
+from the_sparse_package import SparseTensor, matmul
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj, OptTensor

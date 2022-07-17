@@ -4,7 +4,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 import torch
 from torch import Tensor
-from torch_sparse import SparseTensor, cat
+from the_sparse_package import SparseTensor, cat
 
 from torch_geometric.data.data import BaseData
 from torch_geometric.data.storage import BaseStorage, NodeStorage

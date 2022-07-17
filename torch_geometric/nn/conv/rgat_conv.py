@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import Parameter, ReLU
 from torch_scatter import scatter_add
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
@@ -327,7 +327,7 @@ class RGATConv(MessagePassing):
             edge_type: The one-dimensional relation type/index for each edge in
                 :obj:`edge_index`.
                 Should be only :obj:`None` in case :obj:`edge_index` is of type
-                :class:`torch_sparse.tensor.SparseTensor`.
+                :class:`the_sparse_package.tensor.SparseTensor`.
                 (default: :obj:`None`)
             edge_attr (Tensor, optional): Edge feature matrix.
                 (default: :obj:`None`)

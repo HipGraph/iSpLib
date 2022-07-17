@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from scipy.linalg import expm
 from torch_scatter import scatter_add
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.data.datapipes import functional_transform
 from torch_geometric.transforms import BaseTransform

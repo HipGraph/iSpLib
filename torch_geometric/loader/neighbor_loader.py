@@ -82,7 +82,7 @@ class NeighborSampler:
             index = torch.LongTensor(index)
 
         if issubclass(self.data_cls, Data):
-            fn = torch.ops.torch_sparse.neighbor_sample
+            fn = torch.ops.the_sparse_package.neighbor_sample
             node, row, col, edge = fn(
                 self.colptr,
                 self.row,
@@ -95,7 +95,7 @@ class NeighborSampler:
 
         elif issubclass(self.data_cls, HeteroData):
             if self.node_time_dict is None:
-                fn = torch.ops.torch_sparse.hetero_neighbor_sample
+                fn = torch.ops.the_sparse_package.hetero_neighbor_sample
                 node_dict, row_dict, col_dict, edge_dict = fn(
                     self.node_types,
                     self.edge_types,
@@ -108,7 +108,7 @@ class NeighborSampler:
                     self.directed,
                 )
             else:
-                fn = torch.ops.torch_sparse.hetero_temporal_neighbor_sample
+                fn = torch.ops.the_sparse_package.hetero_temporal_neighbor_sample
                 node_dict, row_dict, col_dict, edge_dict = fn(
                     self.node_types,
                     self.edge_types,

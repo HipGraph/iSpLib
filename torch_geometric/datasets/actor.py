@@ -2,7 +2,7 @@ from typing import Callable, List, Optional
 
 import numpy as np
 import torch
-from torch_sparse import SparseTensor, coalesce
+from the_sparse_package import SparseTensor, coalesce
 
 from torch_geometric.data import Data, InMemoryDataset, download_url
 

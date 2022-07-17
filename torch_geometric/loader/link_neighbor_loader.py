@@ -65,7 +65,7 @@ class LinkNeighborSampler(NeighborSampler):
             edge_label_index, edge_label)
 
         if issubclass(self.data_cls, Data):
-            sample_fn = torch.ops.torch_sparse.neighbor_sample
+            sample_fn = torch.ops.the_sparse_package.neighbor_sample
 
             query_nodes = edge_label_index.view(-1)
             query_nodes, reverse = query_nodes.unique(return_inverse=True)
@@ -83,7 +83,7 @@ class LinkNeighborSampler(NeighborSampler):
             return node, row, col, edge, edge_label_index, edge_label
 
         elif issubclass(self.data_cls, HeteroData):
-            sample_fn = torch.ops.torch_sparse.hetero_neighbor_sample
+            sample_fn = torch.ops.the_sparse_package.hetero_neighbor_sample
 
             if self.input_type[0] != self.input_type[-1]:
                 query_src = edge_label_index[0]

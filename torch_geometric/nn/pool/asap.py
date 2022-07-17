@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 from torch.nn import Linear
 from torch_scatter import scatter
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn import LEConv
 from torch_geometric.nn.pool.topk_pool import topk

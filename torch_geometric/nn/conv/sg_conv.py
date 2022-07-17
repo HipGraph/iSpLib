@@ -1,7 +1,7 @@
 from typing import Optional
 
 from torch import Tensor
-from torch_sparse import SparseTensor, matmul
+from the_sparse_package import SparseTensor, matmul
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.conv.gcn_conv import gcn_norm

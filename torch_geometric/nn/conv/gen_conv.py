@@ -13,7 +13,7 @@ from torch.nn import (
     Sequential,
 )
 from torch_scatter import scatter, scatter_softmax
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

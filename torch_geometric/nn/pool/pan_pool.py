@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 from torch.nn import Parameter
 from torch_scatter import scatter_add
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.typing import OptTensor
 from torch_geometric.utils import softmax

@@ -2,7 +2,7 @@ from itertools import chain
 
 import torch
 from scipy.sparse.csgraph import minimum_spanning_tree
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.utils import to_undirected
 

@@ -71,7 +71,7 @@ Using the :class:`SparseTensor` class is straightforward and similar to the way 
 
 .. code-block:: python
 
-    from torch_sparse import SparseTensor
+    from the_sparse_package import SparseTensor
 
     adj = SparseTensor(row=edge_index[0], col=edge_index[1], value=...,
                        sparse_sizes=(num_nodes, num_nodes))
@@ -113,7 +113,7 @@ With it, the :class:`~torch_geometric.nn.conv.GINConv` layer can now be implemen
 
 .. code-block:: python
 
-    from torch_sparse import matmul
+    from the_sparse_package import matmul
 
     class GINConv(MessagePassing):
         def __init__(self):

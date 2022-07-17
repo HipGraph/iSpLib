@@ -1,6 +1,6 @@
 import torch
 from torch_scatter import scatter_add
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.data import Data
 from torch_geometric.data.datapipes import functional_transform

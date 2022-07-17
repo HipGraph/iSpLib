@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from torch.nn import Linear as Lin
 from torch.nn import ReLU
 from torch.nn import Sequential as Seq
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn import PPFConv
 from torch_geometric.testing import is_full_test

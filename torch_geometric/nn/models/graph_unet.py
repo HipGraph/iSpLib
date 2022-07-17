@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch_sparse import spspmm
+from the_sparse_package import spspmm
 
 from torch_geometric.nn import GCNConv, TopKPooling
 from torch_geometric.utils import (

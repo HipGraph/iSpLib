@@ -2,7 +2,7 @@ from typing import Optional
 
 import torch
 from torch_scatter import scatter_mean
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.utils import remove_self_loops
 

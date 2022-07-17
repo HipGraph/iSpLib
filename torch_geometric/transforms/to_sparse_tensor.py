@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.data.datapipes import functional_transform
@@ -12,7 +12,7 @@ from torch_geometric.utils import sort_edge_index
 class ToSparseTensor(BaseTransform):
     r"""Converts the :obj:`edge_index` attributes of a homogeneous or
     heterogeneous data object into a (transposed)
-    :class:`torch_sparse.SparseTensor` type with key :obj:`adj_t`
+    :class:`the_sparse_package.SparseTensor` type with key :obj:`adj_t`
     (functional name: :obj:`to_sparse_tensor`).
 
     .. note::
@@ -24,7 +24,7 @@ class ToSparseTensor(BaseTransform):
 
     Args:
         attr (str, optional): The name of the attribute to add as a value to
-            the :class:`~torch_sparse.SparseTensor` object (if present).
+            the :class:`~the_sparse_package.SparseTensor` object (if present).
             (default: :obj:`edge_weight`)
         remove_edge_index (bool, optional): If set to :obj:`False`, the
             :obj:`edge_index` tensor will not be removed.

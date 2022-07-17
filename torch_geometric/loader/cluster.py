@@ -5,7 +5,7 @@ from typing import Optional
 
 import torch
 import torch.utils.data
-from torch_sparse import SparseTensor, cat
+from the_sparse_package import SparseTensor, cat
 
 
 class ClusterData(torch.utils.data.Dataset):

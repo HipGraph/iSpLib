@@ -3,7 +3,7 @@ from typing import Optional
 
 import torch
 from torch import Tensor
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import Batch, Data
 
@@ -68,7 +68,7 @@ class ShaDowKHopSampler(torch.utils.data.DataLoader):
         n_id = torch.tensor(n_id)
 
         rowptr, col, value = self.adj_t.csr()
-        out = torch.ops.torch_sparse.ego_k_hop_sample_adj(
+        out = torch.ops.the_sparse_package.ego_k_hop_sample_adj(
             rowptr, col, n_id, self.depth, self.num_neighbors, self.replace)
         rowptr, col, n_id, e_id, ptr, root_n_id = out
 
@@ -77,7 +77,7 @@ class ShaDowKHopSampler(torch.utils.data.DataLoader):
                              sparse_sizes=(n_id.numel(), n_id.numel()),
                              is_sorted=True, trust_data=True)
 
-        batch = Batch(batch=torch.ops.torch_sparse.ptr2ind(ptr, n_id.numel()),
+        batch = Batch(batch=torch.ops.the_sparse_package.ptr2ind(ptr, n_id.numel()),
                       ptr=ptr)
         batch.root_n_id = root_n_id
 

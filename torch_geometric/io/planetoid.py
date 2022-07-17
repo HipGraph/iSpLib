@@ -4,8 +4,8 @@ import warnings
 from itertools import repeat
 
 import torch
-from torch_sparse import SparseTensor
-from torch_sparse import coalesce as coalesce_fn
+from the_sparse_package import SparseTensor
+from the_sparse_package import coalesce as coalesce_fn
 
 from torch_geometric.data import Data
 from torch_geometric.io import read_txt_array

@@ -6,7 +6,7 @@ from torch import Tensor
 from torch.nn import Parameter
 from torch.nn import Parameter as Param
 from torch_scatter import scatter
-from torch_sparse import SparseTensor, masked_select_nnz, matmul
+from the_sparse_package import SparseTensor, masked_select_nnz, matmul
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.typing import Adj, OptTensor
@@ -164,7 +164,7 @@ class RGCNConv(MessagePassing):
             edge_type: The one-dimensional relation type/index for each edge in
                 :obj:`edge_index`.
                 Should be only :obj:`None` in case :obj:`edge_index` is of type
-                :class:`torch_sparse.tensor.SparseTensor`.
+                :class:`the_sparse_package.tensor.SparseTensor`.
                 (default: :obj:`None`)
         """
 

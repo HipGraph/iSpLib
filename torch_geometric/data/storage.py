@@ -17,7 +17,7 @@ from typing import (
 
 import torch
 from torch import Tensor
-from torch_sparse import SparseTensor, coalesce
+from the_sparse_package import SparseTensor, coalesce
 
 from torch_geometric.data.view import ItemsView, KeysView, ValuesView
 from torch_geometric.typing import EdgeType, NodeType
@@ -316,10 +316,10 @@ class EdgeStorage(BaseStorage):
     * :obj:`edge_index`: A :class:`torch.LongTensor` holding edge indices in
       COO format with shape :obj:`[2, num_edges]` (the default format)
 
-    * :obj:`adj`: A :class:`torch_sparse.SparseTensor` holding edge indices in
+    * :obj:`adj`: A :class:`the_sparse_package.SparseTensor` holding edge indices in
       a sparse format, supporting both COO and CSR format.
 
-    * :obj:`adj_t`: A **transposed** :class:`torch_sparse.SparseTensor` holding
+    * :obj:`adj_t`: A **transposed** :class:`the_sparse_package.SparseTensor` holding
       edge indices in a sparse format, supporting both COO and CSR format.
       This is the most efficient one for graph-based deep learning models as
       indices are sorted based on target nodes.

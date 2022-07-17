@@ -4,7 +4,7 @@ import shutil
 from typing import Callable, List, Optional
 
 import torch
-from torch_sparse import coalesce, transpose
+from the_sparse_package import coalesce, transpose
 
 from torch_geometric.data import (
     HeteroData,

@@ -3,7 +3,7 @@ from typing import Tuple, Union
 import torch
 from torch import Tensor
 from torch.nn import ModuleList
-from torch_sparse import SparseTensor, matmul
+from the_sparse_package import SparseTensor, matmul
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear
