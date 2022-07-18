@@ -4,7 +4,7 @@ import sys
 
 import numpy as np
 import torch
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 import torch_geometric
 from torch_geometric.data import Batch, Data, HeteroData

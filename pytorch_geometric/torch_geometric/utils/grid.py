@@ -1,5 +1,5 @@
 import torch
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 
 def grid(height, width, dtype=None, device=None):

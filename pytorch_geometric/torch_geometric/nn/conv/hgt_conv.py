@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import Parameter
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense import Linear
@@ -125,7 +125,7 @@ class HGTConv(MessagePassing):
                 dictionary holding graph connectivity information for each
                 individual edge type, either as a :obj:`torch.LongTensor` of
                 shape :obj:`[2, num_edges]` or a
-                :obj:`torch_sparse.SparseTensor`.
+                :obj:`the_sparse_package.SparseTensor`.
 
         :rtype: :obj:`Dict[str, Optional[Tensor]]` - The output node embeddings
             for each node type.

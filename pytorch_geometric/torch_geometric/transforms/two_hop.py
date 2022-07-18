@@ -1,5 +1,5 @@
 import torch
-from torch_sparse import coalesce, spspmm
+from the_sparse_package import coalesce, spspmm
 
 from torch_geometric.data.datapipes import functional_transform
 from torch_geometric.transforms import BaseTransform

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import torch
 from torch import Tensor
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.typing import Adj, EdgeTensorType, OptTensor
 from torch_geometric.utils.mixin import CastMixin
@@ -144,11 +144,11 @@ class GraphStore:
         if layout == EdgeLayout.COO:
             if attr.layout == EdgeLayout.CSR:
                 col = from_tuple[1]
-                row = torch.ops.torch_sparse.ptr2ind(from_tuple[0],
+                row = torch.ops.the_sparse_package.ptr2ind(from_tuple[0],
                                                      col.numel())
             else:
                 row = from_tuple[0]
-                col = torch.ops.torch_sparse.ptr2ind(from_tuple[1],
+                col = torch.ops.the_sparse_package.ptr2ind(from_tuple[1],
                                                      row.numel())
             perm = None
 
@@ -371,7 +371,7 @@ def to_csc(
         if not is_sorted:
             perm = (col * size[0]).add_(row).argsort()
             row = row[perm]
-        colptr = torch.ops.torch_sparse.ind2ptr(col[perm], size[1])
+        colptr = torch.ops.the_sparse_package.ind2ptr(col[perm], size[1])
 
     colptr = colptr.to(device)
     row = row.to(device)

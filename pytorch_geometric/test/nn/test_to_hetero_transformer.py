@@ -5,7 +5,7 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 from torch.nn import Linear, ReLU, Sequential
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn import BatchNorm, GCNConv, GINEConv, GlobalPooling
 from torch_geometric.nn import Linear as LazyLinear

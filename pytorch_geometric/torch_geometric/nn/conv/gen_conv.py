@@ -9,7 +9,7 @@ from torch.nn import (
     ReLU,
     Sequential,
 )
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

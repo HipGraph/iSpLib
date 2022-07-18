@@ -190,7 +190,7 @@ def test_link_neighbor_loader_edge_label():
         assert torch.all(batch.edge_label[10:] == 0)
 
 
-@withRegisteredOp('torch_sparse.hetero_temporal_neighbor_sample')
+@withRegisteredOp('the_sparse_package.hetero_temporal_neighbor_sample')
 def test_temporal_heterogeneous_link_neighbor_loader():
     torch.manual_seed(12345)
 

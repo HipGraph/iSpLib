@@ -1,7 +1,7 @@
 from typing import Callable, Optional, Tuple, Union
 
 from torch import Tensor
-from torch_sparse import SparseTensor, set_diag
+from the_sparse_package import SparseTensor, set_diag
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

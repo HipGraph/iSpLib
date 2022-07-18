@@ -8,7 +8,7 @@ import numpy as np
 import torch
 from torch.nn import Embedding, Linear
 from torch_scatter import scatter
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import Dataset, download_url
 from torch_geometric.data.makedirs import makedirs

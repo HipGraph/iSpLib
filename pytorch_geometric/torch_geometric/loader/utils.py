@@ -4,7 +4,7 @@ from typing import Dict, Optional, Tuple, Union
 
 import torch
 from torch import Tensor
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.data import Data, HeteroData
 from torch_geometric.data.feature_store import FeatureStore
@@ -60,7 +60,7 @@ def to_csc(
         if not is_sorted:
             perm = (col * data.size(0)).add_(row).argsort()
             row = row[perm]
-        colptr = torch.ops.torch_sparse.ind2ptr(col[perm], data.size(1))
+        colptr = torch.ops.the_sparse_package.ind2ptr(col[perm], data.size(1))
     else:
         raise AttributeError("Data object does not contain attributes "
                              "'adj', 'adj_t' or 'edge_index'")

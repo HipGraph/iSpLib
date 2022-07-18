@@ -1,6 +1,6 @@
 from torch import Tensor
-from torch_sparse import SparseTensor, matmul, set_diag
-from torch_sparse import sum as sparsesum
+from the_sparse_package import SparseTensor, matmul, set_diag
+from the_sparse_package import sum as sparsesum
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

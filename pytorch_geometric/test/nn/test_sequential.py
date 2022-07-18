@@ -3,7 +3,7 @@ from collections import OrderedDict
 import torch
 import torch.fx
 from torch.nn import Dropout, Linear, ReLU
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn import (
     GCNConv,

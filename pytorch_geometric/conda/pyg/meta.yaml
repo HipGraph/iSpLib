@@ -32,7 +32,7 @@ build:
 test:
   imports:
     - torch_scatter
-    - torch_sparse
+    - the_sparse_package
     - torch_cluster
     - torch_spline_conv
     - torch_geometric

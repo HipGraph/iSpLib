@@ -2,7 +2,7 @@ import os.path as osp
 from typing import Optional
 
 import torch
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 from tqdm import tqdm
 
 

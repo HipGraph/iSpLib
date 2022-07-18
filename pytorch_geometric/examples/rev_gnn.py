@@ -9,7 +9,7 @@ import os.path as osp
 import torch
 import torch.nn.functional as F
 from torch.nn import LayerNorm, Linear
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 from tqdm import tqdm
 
 import torch_geometric.transforms as T

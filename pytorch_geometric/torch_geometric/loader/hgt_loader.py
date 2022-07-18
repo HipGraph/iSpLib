@@ -122,7 +122,7 @@ class HGTLoader(torch.utils.data.DataLoader):
         self.num_hops = max([len(v) for v in num_samples.values()])
         self.transform = transform
         self.filter_per_worker = filter_per_worker
-        self.sample_fn = torch.ops.torch_sparse.hgt_sample
+        self.sample_fn = torch.ops.the_sparse_package.hgt_sample
 
         # Convert the graph data into a suitable format for sampling.
         # NOTE: Since C++ cannot take dictionaries with tuples as key as

@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from torch import Tensor
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 # Types for accessing data ####################################################
 

@@ -1,7 +1,7 @@
 import warnings
 
 import torch
-from torch_sparse import SparseTensor
+from the_sparse_package import SparseTensor
 
 from torch_geometric.nn import SplineConv
 from torch_geometric.testing import is_full_test, withPackage

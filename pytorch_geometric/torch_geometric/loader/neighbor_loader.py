@@ -152,7 +152,7 @@ class NeighborSampler:
             raise TypeError(f'NeighborLoader found invalid type: {type(data)}')
 
     def _sparse_neighbor_sample(self, index: Tensor):
-        fn = torch.ops.torch_sparse.neighbor_sample
+        fn = torch.ops.the_sparse_package.neighbor_sample
         node, row, col, edge = fn(
             self.colptr,
             self.row,
@@ -165,7 +165,7 @@ class NeighborSampler:
 
     def _hetero_sparse_neighbor_sample(self, index_dict: Dict[str, Tensor]):
         if self.node_time_dict is None:
-            fn = torch.ops.torch_sparse.hetero_neighbor_sample
+            fn = torch.ops.the_sparse_package.hetero_neighbor_sample
             node_dict, row_dict, col_dict, edge_dict = fn(
                 self.node_types,
                 self.edge_types,
@@ -179,13 +179,13 @@ class NeighborSampler:
             )
         else:
             try:
-                fn = torch.ops.torch_sparse.hetero_temporal_neighbor_sample
+                fn = torch.ops.the_sparse_package.hetero_temporal_neighbor_sample
             except RuntimeError as e:
                 raise RuntimeError(
-                    "'torch_sparse' operator "
+                    "'the_sparse_package' operator "
                     "'hetero_temporal_neighbor_sample' not "
                     "found. Currently requires building "
-                    "'torch_sparse' from master.", e)
+                    "'the_sparse_package' from master.", e)
 
             node_dict, row_dict, col_dict, edge_dict = fn(
                 self.node_types,

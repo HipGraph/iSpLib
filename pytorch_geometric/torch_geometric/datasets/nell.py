@@ -19,9 +19,9 @@ class NELL(InMemoryDataset):
     .. note::
 
         Entity nodes are described by sparse feature vectors of type
-        :class:`torch_sparse.SparseTensor`, which can be either used directly,
+        :class:`the_sparse_package.SparseTensor`, which can be either used directly,
         or can be converted via :obj:`data.x.to_dense()`,
-        :obj:`data.x.to_scipy()` or :obj:`data.x.to_torch_sparse_coo_tensor()`.
+        :obj:`data.x.to_scipy()` or :obj:`data.x.to_the_sparse_package_coo_tensor()`.
 
     Args:
         root (string): Root directory where the dataset should be saved.

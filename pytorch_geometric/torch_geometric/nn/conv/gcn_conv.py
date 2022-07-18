@@ -4,8 +4,8 @@ import torch
 from torch import Tensor
 from torch.nn import Parameter
 from torch_scatter import scatter_add
-from torch_sparse import SparseTensor, fill_diag, matmul, mul
-from torch_sparse import sum as sparsesum
+from the_sparse_package import SparseTensor, fill_diag, matmul, mul
+from the_sparse_package import sum as sparsesum
 
 from torch_geometric.nn.conv import MessagePassing
 from torch_geometric.nn.dense.linear import Linear

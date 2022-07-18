@@ -2,7 +2,7 @@ import os.path as osp
 from typing import Callable, List, Optional
 
 import torch
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.data import Data, InMemoryDataset, download_url
 

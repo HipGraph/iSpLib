@@ -3,7 +3,7 @@ from collections import namedtuple
 import torch
 import torch.nn.functional as F
 from torch_scatter import scatter_add
-from torch_sparse import coalesce
+from the_sparse_package import coalesce
 
 from torch_geometric.utils import softmax
 

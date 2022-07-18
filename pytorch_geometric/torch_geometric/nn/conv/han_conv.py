@@ -115,7 +115,7 @@ class HANConv(MessagePassing):
                 dictionary holding graph connectivity information for each
                 individual edge type, either as a :obj:`torch.LongTensor` of
                 shape :obj:`[2, num_edges]` or a
-                :obj:`torch_sparse.SparseTensor`.
+                :obj:`the_sparse_package.SparseTensor`.
 
         :rtype: :obj:`Dict[str, Optional[Tensor]]` - The output node embeddings
             for each node type.

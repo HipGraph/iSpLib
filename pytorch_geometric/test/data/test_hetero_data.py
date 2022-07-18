@@ -2,7 +2,7 @@ import copy
 
 import pytest
 import torch
-import torch_sparse
+import the_sparse_package
 
 from torch_geometric.data import HeteroData
 from torch_geometric.data.storage import EdgeStorage
@@ -450,7 +450,7 @@ def test_basic_graph_store():
     data = HeteroData()
 
     edge_index = torch.LongTensor([[0, 1], [1, 2]])
-    adj = torch_sparse.SparseTensor(row=edge_index[0], col=edge_index[1],
+    adj = the_sparse_package.SparseTensor(row=edge_index[0], col=edge_index[1],
                                     sparse_sizes=(3, 3))
 
     def assert_equal_tensor_tuple(expected, actual):
