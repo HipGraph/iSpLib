@@ -1,8 +1,0 @@
-[run]
-source=the_sparse_package
-[report]
-exclude_lines =
-    pragma: no cover
-    torch.jit.script
-    raise
-    except

@@ -1,5 +1,0 @@
-include README.md
-include LICENSE
-
-recursive-exclude test *
-recursive-include csrc *
