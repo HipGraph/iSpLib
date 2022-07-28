@@ -131,7 +131,7 @@ class GCNConv(MessagePassing):
                  improved: bool = False, cached: bool = False,
                  add_self_loops: bool = True, normalize: bool = True,
                  bias: bool = True, **kwargs):
-
+        print("gcn conv initialization")
         kwargs.setdefault('aggr', 'add')
         super().__init__(**kwargs)
 
@@ -164,7 +164,7 @@ class GCNConv(MessagePassing):
     def forward(self, x: Tensor, edge_index: Adj,
                 edge_weight: OptTensor = None) -> Tensor:
         """"""
-
+        print("gcn conv forward")
         if self.normalize:
             if isinstance(edge_index, Tensor):
                 cache = self._cached_edge_index
@@ -200,7 +200,9 @@ class GCNConv(MessagePassing):
         return out
 
     def message(self, x_j: Tensor, edge_weight: OptTensor) -> Tensor:
+        print("gcn conv message")
         return x_j if edge_weight is None else edge_weight.view(-1, 1) * x_j
 
     def message_and_aggregate(self, adj_t: SparseTensor, x: Tensor) -> Tensor:
+        print("gcn conv message and aggregate")
         return matmul(adj_t, x, reduce=self.aggr)

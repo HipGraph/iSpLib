@@ -1,5 +1,0 @@
-scipy
-
-[test]
-pytest
-pytest-cov
