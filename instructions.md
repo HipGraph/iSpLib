@@ -4,7 +4,7 @@ create a folder for the project
 git clone https://github.com/pyg-team/pytorch_geometric.git 
 
 
-download from link https://github.com/rusty1s/torch_sparse/archive/refs/tags/0.6.14.zip
+download from link https://github.com/rusty1s/pytorch_sparse/archive/refs/tags/0.6.14.zip
 
 
 replace the word torch_sparse with the_sparse_package
