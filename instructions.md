@@ -18,6 +18,8 @@ python -m venv venv
 
 .\venv\Scripts\activate
 
+For mac: source venv/bin/activate
+
 
 pip install torch
 
