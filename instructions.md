@@ -30,7 +30,7 @@ cd the_sparse_package
 rm .git*
 
 
-pip install .
+python setup.py develop
 
 
 cd ..
@@ -42,4 +42,4 @@ cd pytorch_geometric
 rm .git*
 
 
-pip install .
+python setup.py develop

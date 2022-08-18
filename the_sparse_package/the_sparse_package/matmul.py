@@ -6,6 +6,7 @@ from the_sparse_package.tensor import SparseTensor
 
 
 def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
+    print('inside spmm sum')
     rowptr, col, value = src.csr()
 
     row = src.storage._row
@@ -90,6 +91,7 @@ def spmm(src: SparseTensor, other: torch.Tensor,
 
 
 def spspmm_sum(src: SparseTensor, other: SparseTensor) -> SparseTensor:
+    print("inside the spspmm_sum function")
     assert src.sparse_size(1) == other.sparse_size(0)
     rowptrA, colA, valueA = src.csr()
     rowptrB, colB, valueB = other.csr()
@@ -113,6 +115,7 @@ def spspmm_add(src: SparseTensor, other: SparseTensor) -> SparseTensor:
 
 def spspmm(src: SparseTensor, other: SparseTensor,
            reduce: str = "sum") -> SparseTensor:
+    print("inside the sparse package spspmm function")
     if reduce == 'sum' or reduce == 'add':
         return spspmm_sum(src, other)
     elif reduce == 'mean' or reduce == 'min' or reduce == 'max':
@@ -134,10 +137,12 @@ def matmul(src, other, reduce):  # noqa: F811
 
 
 def matmul(src, other, reduce="sum"):  # noqa: F811
-    print("inside the sparse package matmul function")
+    print("inside the_sparse_package matmul function")
     if isinstance(other, torch.Tensor):
+        print('going into spmm')
         return spmm(src, other, reduce)
     elif isinstance(other, SparseTensor):
+        print('going into spspmm')
         return spspmm(src, other, reduce)
     raise ValueError
 

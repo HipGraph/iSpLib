@@ -205,4 +205,5 @@ class GCNConv(MessagePassing):
 
     def message_and_aggregate(self, adj_t: SparseTensor, x: Tensor) -> Tensor:
         print("gcn conv message and aggregate")
+        print('aggr',self.aggr)
         return matmul(adj_t, x, reduce=self.aggr)
