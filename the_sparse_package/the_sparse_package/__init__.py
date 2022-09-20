@@ -8,7 +8,7 @@ __version__ = '0.6.14'
 for library in [
         '_version', '_convert', '_diag', '_spmm', '_spspmm', '_metis', '_rw',
         '_saint', '_sample', '_ego_sample', '_hgt_sample', '_neighbor_sample',
-        '_relabel'
+        '_relabel','_the_cpp_function_2'
 ]:
     cuda_spec = importlib.machinery.PathFinder().find_spec(
         f'{library}_cuda', [osp.dirname(__file__)])

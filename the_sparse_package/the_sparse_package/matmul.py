@@ -23,7 +23,6 @@ def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
         row = src.storage.row()
         csr2csc = src.storage.csr2csc()
         colptr = src.storage.colptr()
-
     return torch.ops.the_sparse_package.spmm_sum(row, rowptr, col, value, colptr,
                                            csr2csc, other)
 
@@ -79,6 +78,8 @@ def spmm_max(src: SparseTensor,
 def spmm(src: SparseTensor, other: torch.Tensor,
          reduce: str = "sum") -> torch.Tensor:
     if reduce == 'sum' or reduce == 'add':
+        print("output from the cpp function ",torch.ops.the_sparse_package.the_cpp_function(torch.tensor([1]),torch.tensor([2])))
+        print("output from the cpp function 2 ",torch.ops.the_sparse_package.the_cpp_function_2(torch.tensor([1]),torch.tensor([2])))
         return spmm_sum(src, other)
     elif reduce == 'mean':
         return spmm_mean(src, other)

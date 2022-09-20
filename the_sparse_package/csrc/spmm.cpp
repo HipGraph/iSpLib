@@ -309,10 +309,15 @@ SPARSE_API torch::Tensor spmm_sum(torch::optional<torch::Tensor> opt_row,
                        torch::optional<torch::Tensor> opt_csr2csc,
                        torch::Tensor mat) {
   auto value = opt_value.has_value() ? opt_value.value() : col;
+  std::cout << "inside the spmm_sum cpp function \n"; 
   return SPMMSum::apply(opt_row, rowptr, col, value, opt_colptr, opt_csr2csc,
                         mat, opt_value.has_value())[0];
 }
-
+torch::Tensor the_cpp_function(torch::Tensor tensor_A, torch::Tensor tensor_B) {
+  
+  std::cout << "inside the cpp function \n"; 
+  return tensor_A;
+}
 SPARSE_API torch::Tensor spmm_mean(torch::optional<torch::Tensor> opt_row,
                         torch::Tensor rowptr, torch::Tensor col,
                         torch::optional<torch::Tensor> opt_value,
@@ -343,6 +348,7 @@ spmm_max(torch::Tensor rowptr, torch::Tensor col,
 
 static auto registry = torch::RegisterOperators()
                            .op("the_sparse_package::spmm_sum", &spmm_sum)
+                           .op("the_sparse_package::the_cpp_function", &the_cpp_function)
                            .op("the_sparse_package::spmm_mean", &spmm_mean)
                            .op("the_sparse_package::spmm_min", &spmm_min)
                            .op("the_sparse_package::spmm_max", &spmm_max);
