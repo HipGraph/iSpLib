@@ -1,5 +1,5 @@
 from typing import Optional, Tuple
-
+import builtins
 import torch
 from torch import Tensor
 
@@ -23,9 +23,12 @@ def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
         row = src.storage.row()
         csr2csc = src.storage.csr2csc()
         colptr = src.storage.colptr()
-
-    return torch.ops.torch_sparse.spmm_sum(row, rowptr, col, value, colptr,
-                                           csr2csc, other)
+    
+    if builtins.TRAINING_STATUS == True:
+      return torch.ops.torch_sparse.spmm_sum(row, rowptr, col, value, colptr, csr2csc, other)
+    else:
+      print('Using FusedMM SpMM...')
+      return torch.ops.torch_sparse.fusedmm_spmm(rowptr, col, value, other) 
 
 
 def spmm_add(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:

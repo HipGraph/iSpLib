@@ -46,6 +46,8 @@ def get_extensions():
     main_files = [path for path in main_files if 'hip' not in path]
 
     for main, suffix in product(main_files, suffices):
+        FUSEDMM = "fusedmm" in main
+            
         define_macros = [('WITH_PYTHON', None)]
         undef_macros = []
 
@@ -111,11 +113,18 @@ def get_extensions():
             sources += [path]
 
         phmap_dir = "third_party/parallel-hashmap"
-
+        extra_objects = []
+        
+        if FUSEDMM:
+            extra_objects += ['csrc/fusedmm/libmyfusedmm.a']
+            extra_compile_args['cxx'] += ["-O3", "-march=native", "-Wall", "-lm", "-fopenmp"]
+            extra_link_args += ['-lgomp']
+            
         Extension = CppExtension if suffix == 'cpu' else CUDAExtension
         extension = Extension(
             f'torch_sparse._{name}_{suffix}',
             sources,
+            extra_objects=extra_objects,
             include_dirs=[extensions_dir, phmap_dir],
             define_macros=define_macros,
             undef_macros=undef_macros,
@@ -124,7 +133,7 @@ def get_extensions():
             libraries=libraries,
         )
         extensions += [extension]
-
+    
     return extensions
 
 
