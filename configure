@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+git clone https://github.com/OnixHoque/FusedMM_Extended.git
+cd ./FusedMM
+git checkout python_compatible_portable
+sh ./configure
+sh ./generate_shared_object.sh
+cp ./shared_object/libmyfusedmm.a ../csrc/fusedmm/
+echo "Configuration complete! Run pip install -e . to install this Python package."
+
