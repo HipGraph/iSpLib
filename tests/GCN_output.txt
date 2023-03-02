@@ -1,0 +1,23 @@
+python3 ./tests/GCN.py
+Training GCN...
+Epoch: 0, Accuracy: 0.4857
+Epoch: 1, Accuracy: 0.6214
+Epoch: 2, Accuracy: 0.7643
+Epoch: 3, Accuracy: 0.8357
+Epoch: 4, Accuracy: 0.8571
+Epoch: 5, Accuracy: 0.9000
+Epoch: 6, Accuracy: 0.8929
+Epoch: 7, Accuracy: 0.8571
+Epoch: 8, Accuracy: 0.9071
+Epoch: 9, Accuracy: 0.9214
+Done!
+Accuracy without FusedMM:  0.69
+Using FusedMM SpMM...
+Using FusedMM SpMM...
+Accuracy with FusedMM:  0.683
+Using FusedMM SpMM...
+Using FusedMM SpMM...
+Non-FusedMM SpMM time:  0.000364 seconds
+FusedMM SpMM time:  0.000168 seconds
+
+Speedup:  2.17x

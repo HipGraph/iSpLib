@@ -3,4 +3,4 @@ all:
 	pip install -e .
 
 test:
-	python3 ./test/GCN.py
+	python3 ./tests/GCN.py
