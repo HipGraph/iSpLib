@@ -3,8 +3,7 @@
 #endif
 #include <torch/script.h>
 #include <iostream>
-// #include "cpu/spmm_cpu.h"
-
+#include "cpu/spmm_cpu.cpp"
 
 #ifdef _WIN32
 #ifdef WITH_PYTHON
@@ -47,7 +46,7 @@ void performDummySpMM();
 }
 
 
-torch::Tensor fusedmm_spmm(torch::Tensor rowptr, torch::Tensor col, torch::Tensor value, torch::Tensor mat)
+torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
 {
     VALUETYPE alpha = 1;
     VALUETYPE beta = 0;
@@ -59,11 +58,13 @@ torch::Tensor fusedmm_spmm(torch::Tensor rowptr, torch::Tensor col, torch::Tenso
 
     INDEXTYPE S_rows = M;
     INDEXTYPE S_cols = N;
-    INDEXTYPE S_nnz = value.numel();
+    INDEXTYPE S_nnz = value.value().numel();
 
     INDEXTYPE * S_rowptr = rowptr.data_ptr<INDEXTYPE>();
     INDEXTYPE * S_colids = col.data_ptr<INDEXTYPE>();
-    VALUETYPE * S_values = value.data_ptr<VALUETYPE>();
+    // VALUETYPE * S_values = value.data_ptr<VALUETYPE>();
+    VALUETYPE * S_values = value.value().data_ptr<VALUETYPE>();
+
     
     INDEXTYPE lda = K; INDEXTYPE ldb = K; INDEXTYPE ldc = K;
 
@@ -105,6 +106,91 @@ torch::Tensor fusedmm_spmm(torch::Tensor rowptr, torch::Tensor col, torch::Tenso
         std::cout << rowptr_data[i] << ",";
     printf("\n");
     */
+}
+
+
+using torch::autograd::AutogradContext;
+using torch::autograd::Variable;
+using torch::autograd::variable_list;
+
+class FusedMM_SPMMSum : public torch::autograd::Function<FusedMM_SPMMSum> {
+public:
+  static variable_list forward(AutogradContext *ctx,
+                               torch::optional<Variable> opt_row,
+                               Variable rowptr, Variable col, Variable value,
+                               torch::optional<Variable> opt_colptr,
+                               torch::optional<Variable> opt_csr2csc,
+                               Variable mat, bool has_value) {
+
+    if (has_value && torch::autograd::any_variable_requires_grad({value})) {
+      AT_ASSERTM(opt_row.has_value(), "Argument `row` is missing");
+    }
+
+    if (torch::autograd::any_variable_requires_grad({mat})) {
+      AT_ASSERTM(opt_row.has_value(), "Argument `row` is missing");
+      AT_ASSERTM(opt_colptr.has_value(), "Argument `colptr` is missing");
+      AT_ASSERTM(opt_csr2csc.has_value(), "Argument `csr2csc` is missing");
+    }
+
+    auto row = opt_row.has_value() ? opt_row.value() : col;
+    auto colptr = opt_colptr.has_value() ? opt_colptr.value() : col;
+    auto csr2csc = opt_csr2csc.has_value() ? opt_csr2csc.value() : col;
+
+    torch::optional<torch::Tensor> opt_value = torch::nullopt;
+    if (has_value)
+      opt_value = value;
+    else
+      opt_value = torch::ones_like(col);  
+
+    // auto out = std::get<0>(spmm_fw(rowptr, col, opt_value, mat, "sum"));
+    auto out = fusedmm_spmm_fw(rowptr, col, opt_value, mat);
+
+    ctx->saved_data["has_value"] = has_value;
+    ctx->save_for_backward({row, rowptr, col, value, colptr, csr2csc, mat});
+    return {out};
+  }
+
+  static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
+    auto has_value = ctx->saved_data["has_value"].toBool();
+    auto grad_out = grad_outs[0];
+    auto saved = ctx->get_saved_variables();
+    auto row = saved[0], rowptr = saved[1], col = saved[2], value = saved[3],
+         colptr = saved[4], csr2csc = saved[5], mat = saved[6];
+
+    auto grad_value = Variable();
+    if (has_value > 0 && torch::autograd::any_variable_requires_grad({value})) {
+      grad_value = spmm_value_bw_cpu(row, rowptr, col, mat, grad_out, "sum");
+    }
+
+    auto grad_mat = Variable();
+    if (torch::autograd::any_variable_requires_grad({mat})) {
+      torch::optional<torch::Tensor> opt_value = torch::nullopt;
+      if (has_value)
+        opt_value = value.view({-1, 1}).index_select(0, csr2csc).view(-1);
+      else
+        opt_value = torch::ones_like(col);
+
+    //   grad_mat = std::get<0>(spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out, "sum"));
+      grad_mat = fusedmm_spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out);
+
+    }
+
+    return {Variable(), Variable(), Variable(), grad_value,
+            Variable(), Variable(), grad_mat,   Variable()};
+  }
+};
+
+
+SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
+                       torch::Tensor rowptr, torch::Tensor col,
+                       torch::optional<torch::Tensor> opt_value,
+                       torch::optional<torch::Tensor> opt_colptr,
+                       torch::optional<torch::Tensor> opt_csr2csc,
+                       torch::Tensor mat) {
+  auto value = opt_value.has_value() ? opt_value.value() : col;
+//   return fusedmm_spmm_fw(rowptr, col, value, mat);
+  return FusedMM_SPMMSum::apply(opt_row, rowptr, col, value, opt_colptr, opt_csr2csc,
+                        mat, opt_value.has_value())[0];
 }
 
 static auto registry = torch::RegisterOperators()

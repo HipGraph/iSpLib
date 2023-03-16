@@ -24,11 +24,11 @@ def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
         csr2csc = src.storage.csr2csc()
         colptr = src.storage.colptr()
     
-    if builtins.TRAINING_STATUS == True:
+    if builtins.FUSEDMM == False:
       return torch.ops.torch_sparse.spmm_sum(row, rowptr, col, value, colptr, csr2csc, other)
     else:
       print('Using FusedMM SpMM...')
-      return torch.ops.torch_sparse.fusedmm_spmm(rowptr, col, value, other) 
+      return torch.ops.torch_sparse.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other) 
 
 
 def spmm_add(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
