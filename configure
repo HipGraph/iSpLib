@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 git clone https://github.com/OnixHoque/FusedMM_Extended.git
-cd ./FusedMM
+cd ./FusedMM_Extended
 git checkout python_compatible_portable
 sh ./configure
 sh ./generate_shared_object.sh
