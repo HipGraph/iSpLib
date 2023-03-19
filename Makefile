@@ -1,5 +1,5 @@
 all:
-	sh ./configure
+	git submodule update --init --recursive
 	pip install -e .
 
 test:
