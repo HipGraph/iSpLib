@@ -47,7 +47,7 @@ When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is ty
 - **2.5x** faster on Cora dataset
 - **2x** faster on Reddit dataset
 
-[Note: The speedup varies depending on the system condition.]
+[Note: The speed-up varies largly depending on the system condition]
 
 To run the test code, use the command: `make test`. This runs the python script in `tests/GCN.py` and prints out the speed-up along with the accuracy. See `tests/Expected_GCN_output.txt` for reference.
 
