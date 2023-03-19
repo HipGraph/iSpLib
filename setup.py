@@ -122,7 +122,7 @@ def get_extensions():
             
         Extension = CppExtension if suffix == 'cpu' else CUDAExtension
         extension = Extension(
-            f'torch_sparse._{name}_{suffix}',
+            f'isplib._{name}_{suffix}',
             sources,
             extra_objects=extra_objects,
             include_dirs=[extensions_dir, phmap_dir],
