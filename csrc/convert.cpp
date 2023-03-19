@@ -44,5 +44,5 @@ SPARSE_API torch::Tensor ptr2ind(torch::Tensor ptr, int64_t E) {
 }
 
 static auto registry = torch::RegisterOperators()
-                           .op("torch_sparse::ind2ptr", &ind2ptr)
-                           .op("torch_sparse::ptr2ind", &ptr2ind);
+                           .op("isplib::ind2ptr", &ind2ptr)
+                           .op("isplib::ptr2ind", &ptr2ind);

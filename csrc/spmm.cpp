@@ -342,7 +342,7 @@ spmm_max(torch::Tensor rowptr, torch::Tensor col,
 }
 
 static auto registry = torch::RegisterOperators()
-                           .op("torch_sparse::spmm_sum", &spmm_sum)
-                           .op("torch_sparse::spmm_mean", &spmm_mean)
-                           .op("torch_sparse::spmm_min", &spmm_min)
-                           .op("torch_sparse::spmm_max", &spmm_max);
+                           .op("isplib::spmm_sum", &spmm_sum)
+                           .op("isplib::spmm_mean", &spmm_mean)
+                           .op("isplib::spmm_min", &spmm_min)
+                           .op("isplib::spmm_max", &spmm_max);

@@ -20,7 +20,7 @@ matrices = [
 ]
 
 
-def get_torch_sparse_coo_tensor(root, group, name):
+def get_isplib_coo_tensor(root, group, name):
     path = osp.join(root, f'{name}.mat')
     if not osp.exists(path):
         try:
@@ -68,7 +68,7 @@ def convert_coo_to_csr(matrix):
 for device in ['cpu', 'cuda']:
     print('DEVICE:', device)
     for group, name in matrices:
-        matrix = get_torch_sparse_coo_tensor(args.root, group, name)
+        matrix = get_isplib_coo_tensor(args.root, group, name)
         matrix = matrix.to(device)
 
         out1 = bucketize(matrix)

@@ -29,4 +29,4 @@ hgt_sample(const c10::Dict<std::string, torch::Tensor> &colptr_dict,
 }
 
 static auto registry =
-    torch::RegisterOperators().op("torch_sparse::hgt_sample", &hgt_sample);
+    torch::RegisterOperators().op("isplib::hgt_sample", &hgt_sample);

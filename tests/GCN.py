@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.nn import SAGEConv
-from torch_sparse.tensor import SparseTensor
+from isplib.tensor import SparseTensor
 
 class Net(torch.nn.Module):
     def __init__(self):
@@ -90,7 +90,7 @@ def get_cumulative_time(FusedMM=False):
         test_GCN(FusedMM)
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
-        p.print_stats('torch_sparse.spmm_sum' if not FusedMM else 'torch_sparse.fusedmm_spmm')
+        p.print_stats('isplib.spmm_sum' if not FusedMM else 'isplib.fusedmm_spmm')
         # print(txt.getvalue())
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
     

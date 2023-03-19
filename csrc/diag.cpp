@@ -33,4 +33,4 @@ SPARSE_API torch::Tensor non_diag_mask(torch::Tensor row, torch::Tensor col, int
 }
 
 static auto registry = torch::RegisterOperators().op(
-    "torch_sparse::non_diag_mask", &non_diag_mask);
+    "isplib::non_diag_mask", &non_diag_mask);

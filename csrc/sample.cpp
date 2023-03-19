@@ -30,4 +30,4 @@ sample_adj(torch::Tensor rowptr, torch::Tensor col, torch::Tensor idx,
 }
 
 static auto registry =
-    torch::RegisterOperators().op("torch_sparse::sample_adj", &sample_adj);
+    torch::RegisterOperators().op("isplib::sample_adj", &sample_adj);

@@ -64,6 +64,6 @@ SPARSE_API torch::Tensor mt_partition(torch::Tensor rowptr, torch::Tensor col,
 }
 
 static auto registry = torch::RegisterOperators()
-                           .op("torch_sparse::partition", &partition)
-                           .op("torch_sparse::partition2", &partition2)
-                           .op("torch_sparse::mt_partition", &mt_partition);
+                           .op("isplib::partition", &partition)
+                           .op("isplib::partition2", &partition2)
+                           .op("isplib::mt_partition", &mt_partition);

@@ -194,5 +194,5 @@ SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
 }
 
 static auto registry = torch::RegisterOperators()
-                           .op("torch_sparse::fusedmm_spmm", &fusedmm_spmm)
-                           .op("torch_sparse::performDummySpMM", &performDummySpMM);
+                           .op("isplib::fusedmm_spmm", &fusedmm_spmm)
+                           .op("isplib::performDummySpMM", &performDummySpMM);
