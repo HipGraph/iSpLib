@@ -39,6 +39,7 @@ from .storage import SparseStorage  # noqa
 from .tensor import SparseTensor  # noqa
 from .diag import remove_diag, set_diag, fill_diag, get_diag
 from .matmul import matmul  # noqa
+from .mul import mul, mul_, mul_nnz, mul_nnz_  # noqa
 from .reduce import sum, mean, min, max  # noqa
 
 __all__ = [
@@ -46,5 +47,6 @@ __all__ = [
     'SparseTensor',
     'matmul',
     'sum',
+    'mul',
     '__version__',
 ]
