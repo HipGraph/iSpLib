@@ -25,10 +25,10 @@ def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
         colptr = src.storage.colptr()
     
     if builtins.FUSEDMM == False:
-      return torch.ops.torch_sparse.spmm_sum(row, rowptr, col, value, colptr, csr2csc, other)
+      return torch.ops.isplib.spmm_sum(row, rowptr, col, value, colptr, csr2csc, other)
     else:
       print('Using FusedMM SpMM...')
-      return torch.ops.torch_sparse.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other) 
+      return torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other) 
 
 
 def spmm_add(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
@@ -55,7 +55,7 @@ def spmm_mean(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
         csr2csc = src.storage.csr2csc()
         colptr = src.storage.colptr()
 
-    return torch.ops.torch_sparse.spmm_mean(row, rowptr, col, value, rowcount,
+    return torch.ops.isplib.spmm_mean(row, rowptr, col, value, rowcount,
                                             colptr, csr2csc, other)
 
 
@@ -66,7 +66,7 @@ def spmm_min(src: SparseTensor,
     if value is not None:
         value = value.to(other.dtype)
 
-    return torch.ops.torch_sparse.spmm_min(rowptr, col, value, other)
+    return torch.ops.isplib.spmm_min(rowptr, col, value, other)
 
 
 def spmm_max(src: SparseTensor,
@@ -76,7 +76,7 @@ def spmm_max(src: SparseTensor,
     if value is not None:
         value = value.to(other.dtype)
 
-    return torch.ops.torch_sparse.spmm_max(rowptr, col, value, other)
+    return torch.ops.isplib.spmm_max(rowptr, col, value, other)
 
 
 def spmm(src: SparseTensor,
@@ -95,8 +95,8 @@ def spmm(src: SparseTensor,
 
 
 def spspmm_sum(src: SparseTensor, other: SparseTensor) -> SparseTensor:
-    A = src.to_torch_sparse_coo_tensor()
-    B = other.to_torch_sparse_coo_tensor()
+    A = src.to_isplib_coo_tensor()
+    B = other.to_isplib_coo_tensor()
     C = torch.sparse.mm(A, B)
     edge_index = C._indices()
     row, col = edge_index[0], edge_index[1]

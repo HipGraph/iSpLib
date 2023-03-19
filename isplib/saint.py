@@ -9,7 +9,7 @@ def saint_subgraph(src: SparseTensor, node_idx: torch.Tensor
     row, col, value = src.coo()
     rowptr = src.storage.rowptr()
 
-    data = torch.ops.torch_sparse.saint_subgraph(node_idx, rowptr, row, col)
+    data = torch.ops.isplib.saint_subgraph(node_idx, rowptr, row, col)
     row, col, edge_index = data
 
     if value is not None:

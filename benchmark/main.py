@@ -41,7 +41,7 @@ def correctness(dataset):
     col = torch.from_numpy(mat_scipy.tocoo().col).to(args.device, torch.long)
     mat = SparseTensor(row=row, col=col, sparse_sizes=mat_scipy.shape)
     mat.fill_cache_()
-    mat_pytorch = mat.to_torch_sparse_coo_tensor().coalesce()
+    mat_pytorch = mat.to_isplib_coo_tensor().coalesce()
 
     for size in sizes:
         try:
@@ -92,7 +92,7 @@ def timing(dataset):
     col = torch.from_numpy(mat_scipy.tocoo().col).to(args.device, torch.long)
     mat = SparseTensor(row=row, col=col, sparse_sizes=mat_scipy.shape)
     mat.fill_cache_()
-    mat_pytorch = mat.to_torch_sparse_coo_tensor().coalesce()
+    mat_pytorch = mat.to_isplib_coo_tensor().coalesce()
     mat_scipy = mat.to_scipy(layout='csr')
 
     def scatter(x):

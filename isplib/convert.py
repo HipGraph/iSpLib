@@ -4,11 +4,11 @@ import torch
 from torch import from_numpy
 
 
-def to_torch_sparse(index, value, m, n):
+def to_isplib(index, value, m, n):
     return torch.sparse_coo_tensor(index.detach(), value, (m, n))
 
 
-def from_torch_sparse(A):
+def from_isplib(A):
     return A.indices().detach(), A.values()
 
 

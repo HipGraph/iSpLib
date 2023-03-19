@@ -38,7 +38,7 @@ def set_diag(src: SparseTensor, values: Optional[Tensor] = None,
     src = remove_diag(src, k=k)
     row, col, value = src.coo()
 
-    mask = torch.ops.torch_sparse.non_diag_mask(row, col, src.size(0),
+    mask = torch.ops.isplib.non_diag_mask(row, col, src.size(0),
                                                 src.size(1), k)
     inv_mask = ~mask
 

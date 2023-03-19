@@ -30,4 +30,4 @@ subgraph(torch::Tensor idx, torch::Tensor rowptr, torch::Tensor row,
 }
 
 static auto registry =
-    torch::RegisterOperators().op("torch_sparse::saint_subgraph", &subgraph);
+    torch::RegisterOperators().op("isplib::saint_subgraph", &subgraph);

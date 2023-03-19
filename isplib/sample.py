@@ -29,7 +29,7 @@ def sample_adj(src: SparseTensor, subset: torch.Tensor, num_neighbors: int,
 
     rowptr, col, value = src.csr()
 
-    rowptr, col, n_id, e_id = torch.ops.torch_sparse.sample_adj(
+    rowptr, col, n_id, e_id = torch.ops.isplib.sample_adj(
         rowptr, col, subset, num_neighbors, replace)
 
     if value is not None:

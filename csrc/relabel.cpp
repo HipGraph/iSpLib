@@ -46,5 +46,5 @@ relabel_one_hop(torch::Tensor rowptr, torch::Tensor col,
 
 static auto registry =
     torch::RegisterOperators()
-        .op("torch_sparse::relabel", &relabel)
-        .op("torch_sparse::relabel_one_hop", &relabel_one_hop);
+        .op("isplib::relabel", &relabel)
+        .op("isplib::relabel_one_hop", &relabel_one_hop);

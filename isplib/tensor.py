@@ -89,7 +89,7 @@ class SparseTensor(object):
                             is_sorted=True, trust_data=True)
 
     @classmethod
-    def from_torch_sparse_coo_tensor(self, mat: torch.Tensor,
+    def from_isplib_coo_tensor(self, mat: torch.Tensor,
                                      has_value: bool = True):
         mat = mat.coalesce()
         index = mat._indices()
@@ -104,7 +104,7 @@ class SparseTensor(object):
                             is_sorted=True, trust_data=True)
 
     @classmethod
-    def from_torch_sparse_csr_tensor(self, mat: torch.Tensor,
+    def from_isplib_csr_tensor(self, mat: torch.Tensor,
                                      has_value: bool = True):
         rowptr = mat.crow_indices()
         col = mat.col_indices()
@@ -491,7 +491,7 @@ class SparseTensor(object):
 
         return mat
 
-    def to_torch_sparse_coo_tensor(
+    def to_isplib_coo_tensor(
             self, dtype: Optional[int] = None) -> torch.Tensor:
         row, col, value = self.coo()
         index = torch.stack([row, col], dim=0)
@@ -501,7 +501,7 @@ class SparseTensor(object):
 
         return torch.sparse_coo_tensor(index, value, self.sizes())
 
-    def to_torch_sparse_csr_tensor(
+    def to_isplib_csr_tensor(
             self, dtype: Optional[int] = None) -> torch.Tensor:
         rowptr, col, value = self.csr()
 

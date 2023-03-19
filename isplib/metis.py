@@ -38,7 +38,7 @@ def partition(
 
     if balance_edge and node_weight:
         raise ValueError("Cannot set 'balance_edge' and 'node_weight' at the "
-                         "same time in 'torch_sparse.partition'")
+                         "same time in 'isplib.partition'")
 
     rowptr, col, value = src.csr()
     rowptr, col = rowptr.cpu(), col.cpu()
@@ -60,17 +60,17 @@ def partition(
         node_weight = node_weight.view(-1).detach().cpu()
         if node_weight.is_floating_point():
             node_weight = weight2metis(node_weight)
-        cluster = torch.ops.torch_sparse.partition2(rowptr, col, value,
+        cluster = torch.ops.isplib.partition2(rowptr, col, value,
                                                     node_weight, num_parts,
                                                     recursive)
     else:
-        cluster = torch.ops.torch_sparse.partition(rowptr, col, value,
+        cluster = torch.ops.isplib.partition(rowptr, col, value,
                                                    num_parts, recursive)
     cluster = cluster.to(src.device())
 
     cluster, perm = cluster.sort()
     out = permute(src, perm)
-    partptr = torch.ops.torch_sparse.ind2ptr(cluster, num_parts)
+    partptr = torch.ops.isplib.ind2ptr(cluster, num_parts)
 
     return out, partptr, perm
 

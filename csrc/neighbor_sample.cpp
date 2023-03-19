@@ -60,7 +60,7 @@ hetero_temporal_neighbor_sample(
 
 static auto registry =
     torch::RegisterOperators()
-        .op("torch_sparse::neighbor_sample", &neighbor_sample)
-        .op("torch_sparse::hetero_neighbor_sample", &hetero_neighbor_sample)
-        .op("torch_sparse::hetero_temporal_neighbor_sample",
+        .op("isplib::neighbor_sample", &neighbor_sample)
+        .op("isplib::hetero_neighbor_sample", &hetero_neighbor_sample)
+        .op("isplib::hetero_temporal_neighbor_sample",
             &hetero_temporal_neighbor_sample);

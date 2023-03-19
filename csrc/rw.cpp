@@ -33,4 +33,4 @@ SPARSE_API torch::Tensor random_walk(torch::Tensor rowptr, torch::Tensor col,
 }
 
 static auto registry =
-    torch::RegisterOperators().op("torch_sparse::random_walk", &random_walk);
+    torch::RegisterOperators().op("isplib::random_walk", &random_walk);

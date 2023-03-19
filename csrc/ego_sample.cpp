@@ -33,4 +33,4 @@ ego_k_hop_sample_adj(torch::Tensor rowptr, torch::Tensor col, torch::Tensor idx,
 }
 
 static auto registry = torch::RegisterOperators().op(
-    "torch_sparse::ego_k_hop_sample_adj", &ego_k_hop_sample_adj);
+    "isplib::ego_k_hop_sample_adj", &ego_k_hop_sample_adj);

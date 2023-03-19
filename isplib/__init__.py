@@ -20,7 +20,7 @@ for library in [
         raise ImportError(f"Could not find module '{library}_cpu' in "
                           f"{osp.dirname(__file__)}")
 
-cuda_version = torch.ops.torch_sparse.cuda_version()
+cuda_version = torch.ops.isplib.cuda_version()
 if torch.version.cuda is not None and cuda_version != -1:  # pragma: no cover
     if cuda_version < 10000:
         major, minor = int(str(cuda_version)[0]), int(str(cuda_version)[2])
@@ -30,10 +30,10 @@ if torch.version.cuda is not None and cuda_version != -1:  # pragma: no cover
 
     if t_major != major:
         raise RuntimeError(
-            f'Detected that PyTorch and torch_sparse were compiled with '
+            f'Detected that PyTorch and isplib were compiled with '
             f'different CUDA versions. PyTorch has CUDA version '
-            f'{t_major}.{t_minor} and torch_sparse has CUDA version '
-            f'{major}.{minor}. Please reinstall the torch_sparse that '
+            f'{t_major}.{t_minor} and isplib has CUDA version '
+            f'{major}.{minor}. Please reinstall the isplib that '
             f'matches your PyTorch install.')
 
 from .storage import SparseStorage  # noqa
@@ -56,7 +56,7 @@ from .bandwidth import reverse_cuthill_mckee  # noqa
 from .saint import saint_subgraph  # noqa
 from .sample import sample, sample_adj  # noqa
 
-from .convert import to_torch_sparse, from_torch_sparse  # noqa
+from .convert import to_isplib, from_isplib  # noqa
 from .convert import to_scipy, from_scipy  # noqa
 from .coalesce import coalesce  # noqa
 from .transpose import transpose  # noqa
@@ -99,8 +99,8 @@ __all__ = [
     'partition',
     'reverse_cuthill_mckee',
     'saint_subgraph',
-    'to_torch_sparse',
-    'from_torch_sparse',
+    'to_isplib',
+    'from_isplib',
     'to_scipy',
     'from_scipy',
     'coalesce',

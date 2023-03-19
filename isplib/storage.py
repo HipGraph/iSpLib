@@ -190,7 +190,7 @@ class SparseStorage(object):
 
         rowptr = self._rowptr
         if rowptr is not None:
-            row = torch.ops.torch_sparse.ptr2ind(rowptr, self._col.numel())
+            row = torch.ops.isplib.ptr2ind(rowptr, self._col.numel())
             self._row = row
             return row
 
@@ -206,7 +206,7 @@ class SparseStorage(object):
 
         row = self._row
         if row is not None:
-            rowptr = torch.ops.torch_sparse.ind2ptr(row, self._sparse_sizes[0])
+            rowptr = torch.ops.isplib.ind2ptr(row, self._sparse_sizes[0])
             self._rowptr = rowptr
             return rowptr
 
@@ -373,7 +373,7 @@ class SparseStorage(object):
 
         csr2csc = self._csr2csc
         if csr2csc is not None:
-            colptr = torch.ops.torch_sparse.ind2ptr(self._col[csr2csc],
+            colptr = torch.ops.isplib.ind2ptr(self._col[csr2csc],
                                                     self._sparse_sizes[1])
         else:
             colptr = self._col.new_zeros(self._sparse_sizes[1] + 1)
