@@ -16,6 +16,30 @@ To install the package, run the following commands:
 - `make`: To install the library.
 - Finally install custom version of torch-geometric `pip install git+https://github.com/gamparohit/pytorch_geometric.git`
 
+## Troubleshoot
+
+- If `make` command exits with unknown error message, try running `pip3 install -e .` instead.
+- If you are having trouble installing torch-scatter, install it with -f flag and torch version. 
+
+```
+import torch
+print(torch.__version__)
+!pip install torch-scatter -f https://data.pyg.org/whl/torch-{torch.__version__}.html
+```
+
+## Convention and Usage
+
+The current iSpLib has both regular and optimized SpMM operation for comparison purpose. The default operation is non-optimized. To use the optimized version, use the following code snippet for running the GNN model:
+
+```
+import builtins
+builtins.FUSEDMM = True
+```
+
+FusedMM method is used as the optimized sparse kernel and it is generated when `./configure` command is run. See details here: [FusedMM Method](https://arxiv.org/abs/2011.06391).
+
+**Note: If you are not using the optimized kernel, you will still have to explicitly mention `builtins.FUSEDMM = False` in the code, otherwise it will raise an error.**
+
 ## Performance and Testing
 
 When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is-
@@ -23,11 +47,13 @@ When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is-
 - **2.57x** faster on Cora dataset
 - **2.05x** faster on Reddit dataset
 
-To run the test code, use the command: `make test`. This runs the python script in `tests/GCN.py` and prints out the speed-up along with the accuracy.
+[Note: The speedup varies depending on the system condition.]
 
-### Example 
+To run the test code, use the command: `make test`. This runs the python script in `tests/GCN.py` and prints out the speed-up along with the accuracy. See `tests/Expected_GCN_output.txt` for reference.
 
-The SpMM operation can also be used directly. Following is an example of a sparse and dense matrix multiplication:
+### SpMM Example
+
+The SpMM operation can also be used directly to multiply two compatible matrices. Following is an example of a sparse and dense matrix multiplication:
 
 ```
 import builtins
