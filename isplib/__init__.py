@@ -6,7 +6,7 @@ import torch
 __version__ = '0.6.16'
 
 for library in [
-        '_version', '_spmm', '_fusedmm','_convert'
+        '_version', '_spmm', '_fusedmm','_convert','_diag'
 ]:
     cuda_spec = importlib.machinery.PathFinder().find_spec(
         f'{library}_cuda', [osp.dirname(__file__)])
@@ -37,7 +37,7 @@ if torch.version.cuda is not None and cuda_version != -1:  # pragma: no cover
 
 from .storage import SparseStorage  # noqa
 from .tensor import SparseTensor  # noqa
-
+from .diag import remove_diag, set_diag, fill_diag, get_diag
 from .matmul import matmul  # noqa
 
 
