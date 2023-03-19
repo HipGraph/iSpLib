@@ -9,8 +9,9 @@ iSpLib is an accelerated sparse kernel library with PyTorch interface. This libr
 
 To install the package, run the following commands:
 
-- `git clone --recursive https://github.com/HipGraph/iSpLib.git`: To clone this repository. This library has a dependency, therfore `--recursive` flag is needed to download the third-party repository.
+- `git clone https://github.com/HipGraph/iSpLib.git`: To clone this repository.
 - `./configure`: To download and run the auto-tuner. This is a pre-requisite for the installation.
+- Install the dependencies `pip install torch torchvision scikit-learn torch-scatter torch-geometric`.
 - `make`: To install the library.
 
 ## Performance and Testing
