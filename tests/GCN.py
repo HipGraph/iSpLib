@@ -17,7 +17,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.nn import SAGEConv
-from torch_sparse.tensor import SparseTensor
+from isplib.tensor import SparseTensor
 
 class Net(torch.nn.Module):
     def __init__(self):

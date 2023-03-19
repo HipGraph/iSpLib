@@ -16,7 +16,7 @@ from torch.utils.cpp_extension import (
 )
 
 __version__ = '0.6.16'
-URL = 'https://github.com/rusty1s/pytorch_sparse'
+URL = 'https://github.com/HipGraph/iSpLib'
 
 WITH_CUDA = False
 if torch.cuda.is_available():
@@ -152,12 +152,12 @@ if torch.cuda.is_available() and torch.version.hip:
     include_package_data = False
 
 setup(
-    name='torch_sparse',
+    name='isplib',
     version=__version__,
     description=('PyTorch Extension Library of Optimized Autograd Sparse '
                  'Matrix Operations'),
-    author='Matthias Fey',
-    author_email='matthias.fey@tu-dortmund.de',
+    author='Ariful Azad, Hoque Anik, Md Saidul, Rohit Gampa',
+    author_email='azad@iu.edu',
     url=URL,
     download_url=f'{URL}/archive/{__version__}.tar.gz',
     keywords=[

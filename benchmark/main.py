@@ -8,7 +8,7 @@ import torch
 from scipy.io import loadmat
 
 from torch_scatter import scatter_add
-from torch_sparse.tensor import SparseTensor
+from isplib.tensor import SparseTensor
 
 short_rows = [
     ('DIMACS10', 'citationCiteseer'),
