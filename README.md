@@ -42,10 +42,10 @@ FusedMM method is used as the optimized sparse kernel and it is generated when `
 
 ## Performance and Testing
 
-When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is-
+When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is typically-
 
-- **2.57x** faster on Cora dataset
-- **2.05x** faster on Reddit dataset
+- **2.5x** faster on Cora dataset
+- **2x** faster on Reddit dataset
 
 [Note: The speedup varies depending on the system condition.]
 
