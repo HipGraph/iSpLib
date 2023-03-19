@@ -15,7 +15,7 @@ from torch.utils.cpp_extension import (
     CUDAExtension,
 )
 
-__version__ = '0.6.16'
+__version__ = '0.1.0'
 URL = 'https://github.com/HipGraph/iSpLib'
 
 WITH_CUDA = False
