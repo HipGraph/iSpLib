@@ -3,7 +3,7 @@ import os.path as osp
 
 import torch
 
-__version__ = '0.6.16'
+__version__ = '0.1.0'
 
 for library in [
         '_version', '_spmm', '_fusedmm','_convert','_diag'
@@ -37,10 +37,10 @@ if torch.version.cuda is not None and cuda_version != -1:  # pragma: no cover
 
 from .storage import SparseStorage  # noqa
 from .tensor import SparseTensor  # noqa
-from .diag import remove_diag, set_diag, fill_diag, get_diag
+from .diag import fill_diag
 from .matmul import matmul  # noqa
-from .mul import mul, mul_, mul_nnz, mul_nnz_  # noqa
-from .reduce import sum, mean, min, max  # noqa
+from .mul import mul
+from .reduce import sum
 
 __all__ = [
     'SparseStorage',
@@ -48,5 +48,6 @@ __all__ = [
     'matmul',
     'sum',
     'mul',
+    'fill_diag',
     '__version__',
 ]
