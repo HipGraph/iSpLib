@@ -11,6 +11,7 @@ To install the package, run the following commands:
 
 - `git clone https://github.com/HipGraph/iSpLib.git`: To clone this repository.
 - `./configure`: To download and run the auto-tuner. This is a pre-requisite for the installation.
+- Create a virtualenv as the packages might conflict.
 - Install the dependencies `pip install torch torchvision scikit-learn torch-scatter`.
 - `make`: To install the library.
 - Finally install custom version of torch-geometric `pip install git+https://github.com/gamparohit/pytorch_geometric.git`
