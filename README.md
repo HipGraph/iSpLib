@@ -76,3 +76,7 @@ print(spmm_sum(a, b))
 
 ## License
 iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause
+
+# Acknowledgements
+
+*This work has been funded by grants from the National Science Foundation, including the ICICLE AI Institute (OAC 2112606)*
