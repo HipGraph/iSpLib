@@ -22,7 +22,7 @@ NumPy >= 1.21 (Or, Anaconda environment)
 
 To install the package, run the following commands:
 
-- `git clone https://github.com/HipGraph/iSpLib.git`: To clone this repository.
+- `git clone https://github.com/ICICLE-ai/iSpLib.git`: To clone this repository.
 - `./configure`: To download and run the auto-tuner. This is a pre-requisite for the installation.
 - Create a virtualenv as the packages might conflict.
 - Install the dependencies `pip install torch torchvision scikit-learn torch-scatter`.
@@ -89,3 +89,7 @@ print(spmm_sum(a, b))
 
 ## License
 iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause
+
+# Acknowledgements
+
+*This work has been funded by grants from the National Science Foundation, including the ICICLE AI Institute (OAC 2112606)*
