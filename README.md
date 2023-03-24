@@ -11,8 +11,8 @@ Users need to have the following software/tools installed in their PC/server. Th
 
 ```
 Make >= 4.4
-GCC version >= 10.1 (Support for C++ >= 14)
-OpenMP version >= 4.5
+GCC >= 10.1 (Support for C++ >= 14)
+OpenMP >= 4.5
 Python >= 3.7
 NumPy >= 1.21 (Or, Anaconda environment)
 ```
