@@ -3,7 +3,20 @@
 
 iSpLib is an accelerated sparse kernel library with PyTorch interface. This library has an auto-tuner which generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently it has support for CPU-based efficient Sparse Dense Matrix Multiplication (spmm-sum only) with autograd.
 
-<p align="center"><img src="fusedmm-workflow.png" alt="iSpLib Workflow" width="50%"/></p>
+<p align="center"><img src="fusedmm-workflow.png" alt="iSpLib Workflow" width="60%"/></p>
+
+## System Requirements
+
+Users need to have the following software/tools installed in their PC/server. The source code was compiled and run successfully in Linux (Ubuntu and Centos distributions).
+
+```
+Make >= 4.4
+GCC version >= 10.1 (Support for C++ >= 14)
+OpenMP version >= 4.5
+Python >= 3.7
+NumPy >= 1.21 (Or, Anaconda environment)
+```
+
 
 ## Installation
 
