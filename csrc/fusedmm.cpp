@@ -45,6 +45,7 @@ void mytest_csr
 void performDummySpMM();
 }
 
+void cuda_spmm_test();
 
 torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
 {
@@ -193,6 +194,12 @@ SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
                         mat, opt_value.has_value())[0];
 }
 
+void test_cuda()
+{
+  cuda_spmm_test();
+}
+
 static auto registry = torch::RegisterOperators()
                            .op("isplib::fusedmm_spmm", &fusedmm_spmm)
+                           .op("isplib::test_cuda", &test_cuda)
                            .op("isplib::performDummySpMM", &performDummySpMM);
