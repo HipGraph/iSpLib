@@ -1,3 +1,4 @@
+venv/
 __pycache__/
 build/
 dist/
@@ -8,3 +9,6 @@ alpha/
 .coverage
 *.so
 .idea/
+third_party/
+Planetoid/
+Reddit/

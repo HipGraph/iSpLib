@@ -9,9 +9,10 @@ import torchvision
 import torchvision.transforms as transforms
 import sklearn.metrics as metrics
 
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import Planetoid, Reddit
 import torch_geometric.transforms as T
-dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
+# dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
+dataset = Reddit("Reddit", transform=T.ToSparseTensor())
 
 import torch
 import torch.nn.functional as F
@@ -22,8 +23,8 @@ from isplib.tensor import SparseTensor
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(dataset.num_node_features, 16, cached=True)
-        self.conv2 = GCNConv(16, dataset.num_classes, cached=True)
+        self.conv1 = GCNConv(dataset.num_node_features, 8, cached=False)
+        self.conv2 = GCNConv(8, dataset.num_classes, cached=False)
 
     def forward(self, data):
         x, adj_t = data.x, data.adj_t
@@ -34,7 +35,8 @@ class Net(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
-device = torch.device('cpu')
+# device = torch.device('cpu')
+device = torch.device('cuda:0')
 model = Net().to(device)
 data = dataset[0].to(device)
 

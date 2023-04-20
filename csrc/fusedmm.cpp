@@ -46,6 +46,28 @@ void performDummySpMM();
 }
 
 void cuda_spmm_test();
+void fusedmm_cuda
+(
+   const char tkern,       // kernel variations
+   const INDEXTYPE m,      // rows of A 
+   const INDEXTYPE n,      // rows of B
+   const INDEXTYPE k,      // dimension: col of A and B
+   const VALUETYPE alpha,  // not used yet  
+   const INDEXTYPE nnz,    // nonzeros  
+   const INDEXTYPE rows,   // number of rows for sparse matrix 
+   const INDEXTYPE cols,   // number of columns for sparse matrix 
+   const VALUETYPE *val,   // NNZ value  
+   const INDEXTYPE *indx,  // colids -> column indices 
+   const INDEXTYPE *pntrb, // starting index for rowptr
+   const INDEXTYPE *pntre, // ending index for rowptr
+   const VALUETYPE *a,     // Dense A (X) matrix
+   const INDEXTYPE lda,    // leading dimension of A (col size since A row-major)  
+   const VALUETYPE *b,     // Dense B matrix
+   const INDEXTYPE ldb,    // leading dimension of B (col size since B row-major)  
+   const VALUETYPE beta,   // beta value 
+   VALUETYPE *c,           // Dense matrix c
+   const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
+);
 
 torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
 {
@@ -85,6 +107,7 @@ torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::op
     VALUETYPE * b = mat.data_ptr<VALUETYPE>();
     VALUETYPE * c = out.data_ptr<VALUETYPE>();
 
+
     // printf("Sparse Values:\n");
     // for (int i = 0; i< S_nnz; i++)
     //     std::cout << S_values[i] << ",";
@@ -95,8 +118,14 @@ torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::op
     //     std::cout << b[i] << ",";
     // printf("\n");
 
-    mytest_csr(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
-    
+    if (rowptr.device().is_cuda())
+    {
+      std::cout << "Invoking FusedMM CUDA\n" ;
+      fusedmm_cuda(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
+    }
+    else{
+      mytest_csr(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
+    }
     return out;
     // auto col_data = col.data_ptr<int64_t>();
 
@@ -160,7 +189,9 @@ public:
 
     auto grad_value = Variable();
     if (has_value > 0 && torch::autograd::any_variable_requires_grad({value})) {
-      grad_value = spmm_value_bw_cpu(row, rowptr, col, mat, grad_out, "sum");
+      // grad_value = spmm_value_bw_cpu(row, rowptr, col, mat, grad_out, "sum");
+      grad_value = Variable();
+
     }
 
     auto grad_mat = Variable();
