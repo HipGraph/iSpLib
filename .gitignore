@@ -9,6 +9,6 @@ alpha/
 .coverage
 *.so
 .idea/
-third_party/
 Planetoid/
 Reddit/
+FusedMM_Extended/
