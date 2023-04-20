@@ -4,7 +4,7 @@ cd ./FusedMM_Extended
 git checkout python_compatible_portable
 sh ./configure
 sh ./generate_shared_object.sh
-cp ./shared_object/libmyfusedmm.a ../csrc/fusedmm/
-export FORCE_ONLY_CPU=1
+cp ./shared_object/libmyfusedmm.a ../csrc/fusedmm/fusedmm_cpu.a
+# export FORCE_ONLY_CPU=1
 echo "Configuration complete! Auto-tuned static C library has been placed."
 
