@@ -9,10 +9,17 @@ import torchvision
 import torchvision.transforms as transforms
 import sklearn.metrics as metrics
 
-from torch_geometric.datasets import Planetoid, Reddit
+from torch_geometric.datasets import Planetoid, Reddit, Amazon, GNNBenchmarkDataset
 import torch_geometric.transforms as T
-# dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
-dataset = Reddit("Reddit", transform=T.ToSparseTensor())
+# dataset = Planetoid("datasets/Planetoid", name="Cora", transform=T.ToSparseTensor())
+dataset = Planetoid("datasets/Planetoid", name="CiteSeer", transform=T.ToSparseTensor())
+# dataset = Planetoid("datasets/Planetoid", name="PubMed", transform=T.ToSparseTensor())
+# dataset = Amazon("datasets/Amazon",name='computers' ,transform=T.Compose([T.ToSparseTensor(),T.RandomNodeSplit()]))
+# dataset = Amazon("datasets/Amazon",name='photo' ,transform=T.Compose([T.ToSparseTensor(),T.RandomNodeSplit()]))
+
+# device = torch.device('cpu')
+device = torch.device('cuda:0')
+
 
 import torch
 import torch.nn.functional as F
@@ -23,8 +30,8 @@ from isplib.tensor import SparseTensor
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(dataset.num_node_features, 8, cached=False)
-        self.conv2 = GCNConv(8, dataset.num_classes, cached=False)
+        self.conv1 = GCNConv(dataset.num_node_features, 16, cached=True)
+        self.conv2 = GCNConv(16, dataset.num_classes, cached=True)
 
     def forward(self, data):
         x, adj_t = data.x, data.adj_t
@@ -35,8 +42,7 @@ class Net(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
-# device = torch.device('cpu')
-device = torch.device('cuda:0')
+
 model = Net().to(device)
 data = dataset[0].to(device)
 

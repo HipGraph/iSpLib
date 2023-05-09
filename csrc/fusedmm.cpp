@@ -45,7 +45,7 @@ void mytest_csr
 void performDummySpMM();
 }
 
-void cuda_spmm_test();
+/*void cuda_spmm_test();*/
 void fusedmm_cuda
 (
    const char tkern,       // kernel variations
@@ -69,13 +69,14 @@ void fusedmm_cuda
    const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
 );
 
-torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
+torch::Tensor fusedmm_spmm_fw(INDEXTYPE nrow, torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
 {
     VALUETYPE alpha = 1;
     VALUETYPE beta = 0;
     const char tkern = 'm';
 
-    INDEXTYPE M = rowptr.numel() - 1;
+    //INDEXTYPE M = rowptr.numel() - 1;
+    INDEXTYPE M = nrow;
     INDEXTYPE N = mat.size(-2);
     INDEXTYPE K = mat.size(-1);
 
@@ -98,7 +99,8 @@ torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::op
     mat = mat.contiguous();
 
     auto sizes = mat.sizes().vec();
-    sizes[mat.dim() - 2] = rowptr.numel() - 1;
+    //sizes[mat.dim() - 2] = rowptr.numel() - 1;
+    sizes[mat.dim() - 2] = M;
     // torch::Tensor out = torch::empty(sizes, mat.options());
     torch::Tensor out = torch::zeros(sizes, mat.options());
 
@@ -171,9 +173,12 @@ public:
       opt_value = value;
     else
       opt_value = torch::ones_like(col);  
-
+    
+    INDEXTYPE M = rowptr.numel() - 1;
     // auto out = std::get<0>(spmm_fw(rowptr, col, opt_value, mat, "sum"));
-    auto out = fusedmm_spmm_fw(rowptr, col, opt_value, mat);
+    
+    auto out = rowptr.device().is_cuda() ? fusedmm_spmm_fw(M, row, col, opt_value, mat) : fusedmm_spmm_fw(M, rowptr, col, opt_value, mat);
+
 
     ctx->saved_data["has_value"] = has_value;
     ctx->save_for_backward({row, rowptr, col, value, colptr, csr2csc, mat});
@@ -191,7 +196,6 @@ public:
     if (has_value > 0 && torch::autograd::any_variable_requires_grad({value})) {
       // grad_value = spmm_value_bw_cpu(row, rowptr, col, mat, grad_out, "sum");
       grad_value = Variable();
-
     }
 
     auto grad_mat = Variable();
@@ -201,10 +205,14 @@ public:
         opt_value = value.view({-1, 1}).index_select(0, csr2csc).view(-1);
       else
         opt_value = torch::ones_like(col);
-
+    
+    INDEXTYPE M = rowptr.numel() - 1;
+    
     //   grad_mat = std::get<0>(spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out, "sum"));
-      grad_mat = fusedmm_spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out);
-
+    if (rowptr.device().is_cuda())
+      grad_mat = fusedmm_spmm_fw(M, col, row, opt_value, grad_out);
+    else
+      grad_mat = fusedmm_spmm_fw(M, colptr, row.index_select(0, csr2csc), opt_value, grad_out);
     }
 
     return {Variable(), Variable(), Variable(), grad_value,
@@ -225,12 +233,12 @@ SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
                         mat, opt_value.has_value())[0];
 }
 
+/*
 void test_cuda()
 {
   cuda_spmm_test();
-}
+}*/
 
 static auto registry = torch::RegisterOperators()
                            .op("isplib::fusedmm_spmm", &fusedmm_spmm)
-                           .op("isplib::test_cuda", &test_cuda)
                            .op("isplib::performDummySpMM", &performDummySpMM);

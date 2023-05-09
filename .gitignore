@@ -12,3 +12,5 @@ alpha/
 Planetoid/
 Reddit/
 FusedMM_Extended/
+datasets/
+/tests/Matrices/*.txt

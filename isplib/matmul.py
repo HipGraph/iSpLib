@@ -13,6 +13,9 @@ def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
     csr2csc = src.storage._csr2csc
     colptr = src.storage._colptr
 
+    # if value is None:
+    #     value = torch.ones_like(row, device=row.device)
+
     if value is not None:
         value = value.to(other.dtype)
 
