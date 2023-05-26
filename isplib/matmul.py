@@ -3,7 +3,7 @@ import builtins
 import torch
 from torch import Tensor
 
-from isplib.tensor import SparseTensor
+from torch_sparse.tensor import SparseTensor
 
 
 def spmm_sum(src: SparseTensor, other: torch.Tensor) -> torch.Tensor:
