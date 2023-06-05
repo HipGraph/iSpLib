@@ -1,9 +1,13 @@
+
+
 #ifdef WITH_PYTHON
 #include <Python.h>
 #endif
+
+#include <ATen/Parallel.h>
 #include <torch/script.h>
 #include <iostream>
-#include "cpu/spmm_cpu.cpp"
+// #include "cpu/spmm_cpu.cpp"
 
 #ifdef _WIN32
 #ifdef WITH_PYTHON
@@ -18,6 +22,58 @@ PyMODINIT_FUNC PyInit__spmm_cpu(void) { return NULL; }
 
 #define INDEXTYPE int64_t
 #define VALUETYPE float
+
+torch::Tensor spmm_value_bw_cpu(torch::Tensor row, torch::Tensor rowptr,
+                                torch::Tensor col, torch::Tensor mat,
+                                torch::Tensor grad, std::string reduce) {
+  CHECK_CPU(row);
+  CHECK_CPU(rowptr);
+  CHECK_CPU(col);
+  CHECK_CPU(mat);
+  CHECK_CPU(grad);
+
+  mat = mat.contiguous();
+  grad = grad.contiguous();
+
+  auto M = grad.size(-2);
+  auto N = mat.size(-2);
+  auto E = row.numel();
+  auto K = mat.size(-1);
+  auto B = mat.numel() / (N * K);
+
+  auto out = torch::zeros({row.numel()}, grad.options());
+
+  auto row_data = row.data_ptr<int64_t>();
+  auto rowptr_data = rowptr.data_ptr<int64_t>();
+  auto col_data = col.data_ptr<int64_t>();
+  AT_DISPATCH_ALL_TYPES_AND2(at::ScalarType::Half, at::ScalarType::BFloat16, mat.scalar_type(), "spmm_value_bw_cpu", [&] {
+    auto mat_data = mat.data_ptr<scalar_t>();
+    auto grad_data = grad.data_ptr<scalar_t>();
+    auto out_data = out.data_ptr<scalar_t>();
+
+    scalar_t val;
+    int64_t row, col;
+    AT_DISPATCH_REDUCTION_TYPES(reduce, [&] {
+      for (int b = 0; b < B; b++) {
+        for (int e = 0; e < E; e++) {
+          row = row_data[e], col = col_data[e], val = (scalar_t)0;
+          for (int k = 0; k < K; k++) {
+            val += mat_data[b * N * K + col * K + k] *
+                   grad_data[b * M * K + row * K + k];
+          }
+          if (REDUCE == MEAN) {
+            int row_start = rowptr_data[row], row_end = rowptr_data[row + 1];
+            val /= (scalar_t)std::max(row_end - row_start, 1);
+          }
+          out_data[e] += val;
+        }
+      }
+    });
+  });
+
+  return out;
+}
+
 
 extern "C" {
 void mytest_csr
