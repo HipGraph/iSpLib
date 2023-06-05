@@ -31,10 +31,10 @@ if os.getenv('FORCE_ONLY_CPU', '0') == '1':
 
 BUILD_DOCS = os.getenv('BUILD_DOCS', '0') == '1'
 
-# WITH_METIS = True if os.getenv('WITH_METIS', '0') == '1' else False
-# WITH_MTMETIS = True if os.getenv('WITH_MTMETIS', '0') == '1' else False
+WITH_METIS = True if os.getenv('WITH_METIS', '0') == '1' else False
+WITH_MTMETIS = True if os.getenv('WITH_MTMETIS', '0') == '1' else False
 
-# WITH_SYMBOLS = True if os.getenv('WITH_SYMBOLS', '0') == '1' else False
+WITH_SYMBOLS = True if os.getenv('WITH_SYMBOLS', '0') == '1' else False
 
 
 def get_extensions():

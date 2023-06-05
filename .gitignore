@@ -8,3 +8,4 @@ alpha/
 .coverage
 *.so
 .idea/
+.vscode/

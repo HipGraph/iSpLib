@@ -1,6 +1,4 @@
-import builtins
-builtins.FUSEDMM = True
-
+from isplib import *
 
 import torch
 import torch.nn as nn
@@ -17,7 +15,7 @@ import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
 from torch_geometric.nn import SAGEConv
-from isplib.tensor import SparseTensor
+from torch_sparse.tensor import SparseTensor
 
 class Net(torch.nn.Module):
     def __init__(self):
@@ -39,7 +37,6 @@ model = Net().to(device)
 data = dataset[0].to(device)
 
 def train_GCN():
-  builtins.FUSEDMM = True
   optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
   model.train()
@@ -55,8 +52,12 @@ def train_GCN():
       acc = correct / data.train_mask.sum().item()
       print('Epoch: %d, Accuracy: %.4f'%(epoch,acc))
 
-def test_GCN(status):
-  builtins.FUSEDMM = status  # Use FusedMM or not
+def test_GCN(FusedMM):
+  if FusedMM:
+    iSpLibPlugin.patch_pyg()
+  else:
+    iSpLibPlugin.unpatch_pyg()
+  #   builtins.FUSEDMM = status  # Use FusedMM or not
   _, pred = model(data).max(dim=1)
   correct = float (pred[data.test_mask].eq(data.y[data.test_mask]).sum().item())
   acc = correct / data.test_mask.sum().item()
@@ -81,6 +82,7 @@ train_GCN()
 print("Done!")
 
 print("Accuracy without FusedMM: ", test_GCN(False))
+# iSpLibPlugin.patch_pyg()
 print("Accuracy with FusedMM: ", test_GCN(True))
 
 import io
@@ -90,11 +92,14 @@ def get_cumulative_time(FusedMM=False):
         test_GCN(FusedMM)
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
-        p.print_stats('isplib.spmm_sum' if not FusedMM else 'isplib.fusedmm_spmm')
+        p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
         # print(txt.getvalue())
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
-    
+
+
+# iSpLibPlugin.unpatch_pyg()
 torch_op_time = float(get_cumulative_time(False))
+# iSpLibPlugin.patch_pyg()
 fusedmm_time = float(get_cumulative_time(True))
 speedup = torch_op_time / fusedmm_time
 
