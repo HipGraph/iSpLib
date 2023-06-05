@@ -43,6 +43,7 @@ PyMODINIT_FUNC PyInit__spmm_cpu(void) { return NULL; }
 #define INDEXTYPE int64_t
 #define VALUETYPE float
 
+#include "fusedMM.h"
 // torch::Tensor spmm_value_bw_cpu(torch::Tensor row, torch::Tensor rowptr,
 //                                 torch::Tensor col, torch::Tensor mat,
 //                                 torch::Tensor grad, std::string reduce) {
@@ -96,33 +97,56 @@ PyMODINIT_FUNC PyInit__spmm_cpu(void) { return NULL; }
 
 
 extern "C" {
-void mytest_csr
-(
-   const char tkern,       // kernel variations
-   const INDEXTYPE m,      // rows of A 
-   const INDEXTYPE n,      // rows of B
-   const INDEXTYPE k,      // dimension: col of A and B
-   const VALUETYPE alpha,  // not used yet  
-   const INDEXTYPE nnz,    // nonzeros  
-   const INDEXTYPE rows,   // number of rows for sparse matrix 
-   const INDEXTYPE cols,   // number of columns for sparse matrix 
-   const VALUETYPE *val,   // NNZ value  
-   const INDEXTYPE *indx,  // colids -> column indices 
-   const INDEXTYPE *pntrb, // starting index for rowptr
-   const INDEXTYPE *pntre, // ending index for rowptr
-   const VALUETYPE *a,     // Dense A (X) matrix
-   const INDEXTYPE lda,    // leading dimension of A (col size since A row-major)  
-   const VALUETYPE *b,     // Dense B matrix
-   const INDEXTYPE ldb,    // leading dimension of B (col size since B row-major)  
-   const VALUETYPE beta,   // beta value 
-   VALUETYPE *c,           // Dense matrix c
-   const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
-);
+// void mytest_csr
+// (
+//    const char tkern,       // kernel variations
+//    const INDEXTYPE m,      // rows of A 
+//    const INDEXTYPE n,      // rows of B
+//    const INDEXTYPE k,      // dimension: col of A and B
+//    const VALUETYPE alpha,  // not used yet  
+//    const INDEXTYPE nnz,    // nonzeros  
+//    const INDEXTYPE rows,   // number of rows for sparse matrix 
+//    const INDEXTYPE cols,   // number of columns for sparse matrix 
+//    const VALUETYPE *val,   // NNZ value  
+//    const INDEXTYPE *indx,  // colids -> column indices 
+//    const INDEXTYPE *pntrb, // starting index for rowptr
+//    const INDEXTYPE *pntre, // ending index for rowptr
+//    const VALUETYPE *a,     // Dense A (X) matrix
+//    const INDEXTYPE lda,    // leading dimension of A (col size since A row-major)  
+//    const VALUETYPE *b,     // Dense B matrix
+//    const INDEXTYPE ldb,    // leading dimension of B (col size since B row-major)  
+//    const VALUETYPE beta,   // beta value 
+//    VALUETYPE *c,           // Dense matrix c
+//    const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
+// );
 void performDummySpMM();
+
+int fusedMM_csr 
+(
+   const int32_t imessage,    // message to dictate the operations  
+   const INDEXTYPE m,         // number of row of X
+   const INDEXTYPE n,         // number of row of Y
+   const INDEXTYPE k,         // dimension (col of X or Y)
+   const VALUETYPE alpha,     // not used yet
+   const INDEXTYPE nnz,       // nonzeros in sparse matrix 
+   const INDEXTYPE rows,      // number of rows in sparse matrix
+   const INDEXTYPE cols,      // number of columns in sparse matrix 
+   const VALUETYPE *val,      // value of non-zeros 
+   const INDEXTYPE *indx,     // colids -> column indices 
+   const INDEXTYPE *pntrb,    // starting of rowptr for each row
+   const INDEXTYPE *pntre,    // ending of rowptr for each row
+   const VALUETYPE *x,        // Dense X matrix
+   const INDEXTYPE ldx,       // 1eading dimension of X   
+   const VALUETYPE *y,        // Dense Y matrix
+   const INDEXTYPE ldy,       // leading dimension of Y   
+   const VALUETYPE beta,      // beta value 
+   VALUETYPE *z,              // Dense matrix Z
+   const INDEXTYPE ldz        // leading dimension size of z 
+);
 }
 
 
-torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat)
+torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat, int reduction = 0)
 {
     VALUETYPE alpha = 1;
     VALUETYPE beta = 0;
@@ -160,28 +184,16 @@ torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::op
     VALUETYPE * b = mat.data_ptr<VALUETYPE>();
     VALUETYPE * c = out.data_ptr<VALUETYPE>();
 
-    // printf("Sparse Values:\n");
-    // for (int i = 0; i< S_nnz; i++)
-    //     std::cout << S_values[i] << ",";
-    // printf("\n\n");
+    // mytest_csr(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
+    int32_t imsg;
+    if (reduction == 0) //sum
+     imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_ADD;
+    else if (reduction == 1) //max
+     imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_MAX;
 
-    // printf("Dense Values:\n");
-    // for (int i = 0; i< szB; i++)
-    //     std::cout << b[i] << ",";
-    // printf("\n");
+	  fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
 
-    mytest_csr(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
-    
     return out;
-    // auto col_data = col.data_ptr<int64_t>();
-
-    // auto B = mat.numel() / (N * K);
-    /*
-    printf("Running fusedmm! Printing rowptr values...\n");
-    for (int i = 0; i< M; i++)
-        std::cout << rowptr_data[i] << ",";
-    printf("\n");
-    */
 }
 
 
@@ -257,6 +269,66 @@ public:
   }
 };
 
+// class FusedMM_SPMMMax : public torch::autograd::Function<FusedMM_SPMMMax> {
+// public:
+//   static variable_list forward(AutogradContext *ctx, Variable rowptr,
+//                                Variable col, Variable value, Variable mat,
+//                                bool has_value) {
+
+//     torch::optional<torch::Tensor> opt_value = torch::nullopt;
+//     if (has_value)
+//       opt_value = value;
+
+//     auto result = fusedmm_spmm_fw(rowptr, col, opt_value, mat, 1);
+
+//     auto out = std::get<0>(result);
+//     // auto arg_out = std::get<1>(result).value();
+//     ctx->saved_data["has_value"] = has_value;
+//     ctx->save_for_backward({col, value, mat});
+//     // ctx->mark_non_differentiable({arg_out});
+//     return {out};
+//   }
+
+//   static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
+//     auto has_value = ctx->saved_data["has_value"].toBool();
+//     auto grad_out = grad_outs[0];
+//     auto saved = ctx->get_saved_variables();
+//     auto col = saved[0], value = saved[1], mat = saved[2], arg_out = saved[3];
+
+//     auto invalid_arg_mask = arg_out == col.size(0);
+//     arg_out = arg_out.masked_fill(invalid_arg_mask, 0);
+
+//     auto grad_value = Variable();
+//     if (has_value > 0 && torch::autograd::any_variable_requires_grad({value})) {
+//       auto ind = col.index_select(0, arg_out.flatten()).view_as(arg_out);
+//       auto out = mat.gather(-2, ind);
+//       out.mul_(grad_out);
+//       out.masked_fill_(invalid_arg_mask, 0);
+
+//       grad_value = torch::zeros_like(value);
+//       grad_value.scatter_add_(0, arg_out.flatten(), out.flatten());
+//     }
+
+//     auto grad_mat = Variable();
+//     if (torch::autograd::any_variable_requires_grad({mat})) {
+//       if (has_value > 0) {
+//         value = value.view({-1, 1})
+//                     .index_select(0, arg_out.flatten())
+//                     .view_as(arg_out)
+//                     .mul_(grad_out);
+//       } else
+//         value = grad_out;
+
+//       value.masked_fill_(invalid_arg_mask, 0);
+//       auto ind = col.index_select(0, arg_out.flatten()).view_as(arg_out);
+
+//       grad_mat = torch::zeros_like(mat);
+//       grad_mat.scatter_add_(-2, ind, value);
+//     }
+
+//     return {Variable(), Variable(), grad_value, grad_mat, Variable()};
+//   }
+// };
 
 SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
                        torch::Tensor rowptr, torch::Tensor col,

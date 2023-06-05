@@ -36,6 +36,7 @@ device = torch.device('cpu')
 model = Net().to(device)
 data = dataset[0].to(device)
 
+@isplib_autotune
 def train_GCN():
   optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
@@ -52,11 +53,12 @@ def train_GCN():
       acc = correct / data.train_mask.sum().item()
       print('Epoch: %d, Accuracy: %.4f'%(epoch,acc))
 
-def test_GCN(FusedMM):
-  if FusedMM:
-    iSpLibPlugin.patch_pyg()
-  else:
-    iSpLibPlugin.unpatch_pyg()
+# def test_GCN(FusedMM):
+def test_GCN():
+#   if FusedMM:
+#     iSpLibPlugin.patch_pyg()
+#   else:
+#     iSpLibPlugin.unpatch_pyg()
   #   builtins.FUSEDMM = status  # Use FusedMM or not
   _, pred = model(data).max(dim=1)
   correct = float (pred[data.test_mask].eq(data.y[data.test_mask]).sum().item())
@@ -77,19 +79,23 @@ def f8(x):
 
 pstats.f8 = f8
 
-print("Training GCN...")
+# iSpLibPlugin.patch_pyg()
+print("## Training GCN...")
 train_GCN()
 print("Done!")
 
-print("Accuracy without FusedMM: ", test_GCN(False))
-# iSpLibPlugin.patch_pyg()
-print("Accuracy with FusedMM: ", test_GCN(True))
+print("## Testing GCN...")
+print("Accuracy without FusedMM: ", test_GCN())
+
+iSpLibPlugin.patch_pyg()
+print("Accuracy with FusedMM: ", test_GCN())
+iSpLibPlugin.unpatch_pyg()
 
 import io
 
-def get_cumulative_time(FusedMM=False):
+def get_cumulative_time(FusedMM):
     with cProfile.Profile() as pr:
-        test_GCN(FusedMM)
+        test_GCN()
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
         p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
@@ -97,10 +103,12 @@ def get_cumulative_time(FusedMM=False):
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
 
 
-# iSpLibPlugin.unpatch_pyg()
 torch_op_time = float(get_cumulative_time(False))
-# iSpLibPlugin.patch_pyg()
+
+iSpLibPlugin.patch_pyg()
 fusedmm_time = float(get_cumulative_time(True))
+iSpLibPlugin.unpatch_pyg()
+
 speedup = torch_op_time / fusedmm_time
 
 print("Non-FusedMM SpMM time: ", torch_op_time, 'seconds')

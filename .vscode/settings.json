@@ -1,5 +1,8 @@
 {
     "files.associations": {
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "xlocale": "cpp",
+        "tuple": "cpp",
+        "xutility": "cpp"
     }
 }
