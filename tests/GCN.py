@@ -9,7 +9,7 @@ import sklearn.metrics as metrics
 
 from torch_geometric.datasets import Planetoid
 import torch_geometric.transforms as T
-dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
+dataset = Planetoid("datasets/Planetoid", name="Cora", transform=T.ToSparseTensor())
 
 import torch
 import torch.nn.functional as F
@@ -115,3 +115,4 @@ print("Non-FusedMM SpMM time: ", torch_op_time, 'seconds')
 print("FusedMM SpMM time: ", fusedmm_time, 'seconds')
 print()
 print("Speedup: ", f'{speedup:.3}x')
+torch.ops.isplib.performDummySpMM(3)
