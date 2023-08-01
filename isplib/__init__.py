@@ -3,9 +3,11 @@ import os.path as osp
 
 import torch
 import torch_sparse
+# print("OK")
 from torch_sparse import SparseTensor
 
 __version__ = '0.1.0'
+
 
 for library in [
         '_fusedmm'
@@ -36,6 +38,7 @@ class iSpLibPlugin:
         def spmm_autotuned(src, other, reduce: str = "sum") -> torch.Tensor:
             if not isinstance(src, SparseTensor):
                 # print(src)
+                src_backup = src
                 src = torch_sparse.SparseTensor.from_torch_sparse_csr_tensor(src)
             rowptr, col, value = src.csr()
 
@@ -55,6 +58,12 @@ class iSpLibPlugin:
                 colptr = src.storage.colptr()
 
             print('Using FusedMM SpMM...')
+            # a = torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other)
+            # b = iSpLibPlugin.backup[1](src_backup, other)
+            # print('---')
+            # print(a)
+            # print(b)
+            # print('---')
             return torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other)
             
         iSpLibPlugin.backup.append(torch_sparse.spmm)

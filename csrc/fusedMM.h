@@ -55,6 +55,7 @@
 #define VSC_NOOP 0x0000       /* NO OP */
 #define VSC_MUL 0x1000        /* Vout[i] = scal * Vin[i] */
 #define VSC_ADD 0x2000        /* Vout[i] = scal + Vin[i] */ 
+#define VSC_MEAN 0x3000        /* Vout[i] = scal + Vin[i] */ 
 #define VSC_UDEF 0xF000       /* USER DEFINE FUNC */ 
 #define VSC_CLEAR(bvec) ((bvec) & (~((int32_t)0xF000)))  
 #define VSC_MASK(bvec) ((bvec) & 0xF000)  
@@ -93,7 +94,8 @@ int fusedMM_csr
    const INDEXTYPE ldy,       /* leading dimension of Y */
    const VALUETYPE beta,      /* beta value, Z = alpha*func(X,Y,A) + beta*Z */
    VALUETYPE *z,              /* Dense matrix Z */
-   const INDEXTYPE ldz        /* leading dimension size of Z */
+   const INDEXTYPE ldz,        /* leading dimension size of Z */
+   INDEXTYPE *z_arg
 );
 
 /*

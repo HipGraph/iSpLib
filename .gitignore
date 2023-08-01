@@ -9,3 +9,5 @@ alpha/
 *.so
 .idea/
 .vscode/
+tests/datasets
+/datasets

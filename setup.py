@@ -21,13 +21,19 @@ URL = 'https://github.com/HipGraph/iSpLib'
 WITH_CUDA = False
 if torch.cuda.is_available():
     WITH_CUDA = CUDA_HOME is not None or torch.version.hip
+
 suffices = ['cpu', 'cuda'] if WITH_CUDA else ['cpu']
+
+
 if os.getenv('FORCE_CUDA', '0') == '1':
     suffices = ['cuda', 'cpu']
 if os.getenv('FORCE_ONLY_CUDA', '0') == '1':
     suffices = ['cuda']
 if os.getenv('FORCE_ONLY_CPU', '0') == '1':
     suffices = ['cpu']
+
+WITH_CUDA = False
+suffices = ['cpu']
 
 BUILD_DOCS = os.getenv('BUILD_DOCS', '0') == '1'
 

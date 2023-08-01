@@ -43,6 +43,9 @@ PyMODINIT_FUNC PyInit__spmm_cpu(void) { return NULL; }
 #define INDEXTYPE int64_t
 #define VALUETYPE float
 
+#include <limits>
+#include <tuple>
+
 #include "fusedMM.h"
 // torch::Tensor spmm_value_bw_cpu(torch::Tensor row, torch::Tensor rowptr,
 //                                 torch::Tensor col, torch::Tensor mat,
@@ -119,7 +122,8 @@ extern "C" {
 //    VALUETYPE *c,           // Dense matrix c
 //    const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
 // );
-void performDummySpMM();
+
+void performDummySpMM(int64_t flag);
 
 int fusedMM_csr 
 (
@@ -141,13 +145,15 @@ int fusedMM_csr
    const INDEXTYPE ldy,       // leading dimension of Y   
    const VALUETYPE beta,      // beta value 
    VALUETYPE *z,              // Dense matrix Z
-   const INDEXTYPE ldz        // leading dimension size of z 
+   const INDEXTYPE ldz,        // leading dimension size of z 
+   INDEXTYPE *z_arg
 );
 }
 
 
-torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat, int reduction = 0)
+std::tuple<torch::Tensor, torch::optional<torch::Tensor>> fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat, int reduction = 0)
 {
+    // std::cout << "HEllo!" <<std::endl;
     VALUETYPE alpha = 1;
     VALUETYPE beta = 0;
     const char tkern = 'm';
@@ -176,24 +182,54 @@ torch::Tensor fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::op
 
     auto sizes = mat.sizes().vec();
     sizes[mat.dim() - 2] = rowptr.numel() - 1;
-    // torch::Tensor out = torch::empty(sizes, mat.options());
-    torch::Tensor out = torch::zeros(sizes, mat.options());
+    // torch::Tensor out = torch::empty(sizes, mat.options()); -> cannot use empty, Fusedmm expected 0 value. C = alpha.AB + beta.C
+    torch::Tensor out;
 
+    if (reduction == 1)       //max
+      out = torch::full(sizes, std::numeric_limits<VALUETYPE>::lowest(), mat.options());
+    else if (reduction == 2)  //min
+      out = torch::full(sizes, std::numeric_limits<VALUETYPE>::max(), mat.options());
+    else
+      out = torch::zeros(sizes, mat.options());
+      
+    // torch::Tensor out_arg; // = torch::zeros(sizes, mat.options());
+    torch::optional<torch::Tensor> out_arg = torch::nullopt;
     auto mat_a = torch::empty({1});
     VALUETYPE * a = mat_a.data_ptr<VALUETYPE>();
     VALUETYPE * b = mat.data_ptr<VALUETYPE>();
     VALUETYPE * c = out.data_ptr<VALUETYPE>();
+    INDEXTYPE * c_idx = 0;
 
     // mytest_csr(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
     int32_t imsg;
-    if (reduction == 0) //sum
-     imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_ADD;
-    else if (reduction == 1) //max
-     imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_MAX;
+    // if (reduction == 0) //sum
+    //  imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_ADD;
+    // else if (reduction == 1) //max
+    //  imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_MAX;
+    switch (reduction){
+      case 1: //max
+        imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_MAX;
+        out_arg = torch::full_like(out, col.numel(), rowptr.options());
+        c_idx = out_arg.value().data_ptr<INDEXTYPE>();
+        break;
+      case 2: //min
+        imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_MIN;
+        // out = torch::full_like(out, mat.options());
+        out_arg = torch::full_like(out, col.numel(), rowptr.options());
+        c_idx = out_arg.value().data_ptr<INDEXTYPE>();
+        break;
+      case 3: //mean
+        imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MEAN | AOP_ADD;
+        break;
+      default:  //sum
+        imsg = VOP_COPY_RHS | ROP_NOOP | SOP_COPY | VSC_MUL | AOP_ADD;
+        break;
+    }
+    // printf("Hello");
+    // std::cout << "imsg: " << imsg << std::endl;
+	  fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc, c_idx);
 
-	  fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
-
-    return out;
+    return std::make_tuple(out, out_arg);
 }
 
 
@@ -231,7 +267,7 @@ public:
       opt_value = torch::ones_like(col);  
 
     // auto out = std::get<0>(spmm_fw(rowptr, col, opt_value, mat, "sum"));
-    auto out = fusedmm_spmm_fw(rowptr, col, opt_value, mat);
+    auto out = std::get<0>(fusedmm_spmm_fw(rowptr, col, opt_value, mat));
 
     ctx->saved_data["has_value"] = has_value;
     ctx->save_for_backward({row, rowptr, col, value, colptr, csr2csc, mat});
@@ -260,7 +296,7 @@ public:
         opt_value = torch::ones_like(col);
 
     //   grad_mat = std::get<0>(spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out, "sum"));
-      grad_mat = fusedmm_spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out);
+      grad_mat = std::get<0>(fusedmm_spmm_fw(colptr, row.index_select(0, csr2csc), opt_value, grad_out));
 
     }
 
@@ -330,7 +366,7 @@ public:
 //   }
 // };
 
-SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
+SPARSE_API torch::Tensor fusedmm_spmm_add(torch::optional<torch::Tensor> opt_row,
                        torch::Tensor rowptr, torch::Tensor col,
                        torch::optional<torch::Tensor> opt_value,
                        torch::optional<torch::Tensor> opt_colptr,
@@ -338,10 +374,26 @@ SPARSE_API torch::Tensor fusedmm_spmm(torch::optional<torch::Tensor> opt_row,
                        torch::Tensor mat) {
   auto value = opt_value.has_value() ? opt_value.value() : col;
 //   return fusedmm_spmm_fw(rowptr, col, value, mat);
+  // std::cout << "HEllo!" <<std::endl;
+  // return rowptr;
+  return FusedMM_SPMMSum::apply(opt_row, rowptr, col, value, opt_colptr, opt_csr2csc, mat, opt_value.has_value())[0];
+}
+
+SPARSE_API torch::Tensor fusedmm_spmm_avg(torch::optional<torch::Tensor> opt_row,
+                       torch::Tensor rowptr, torch::Tensor col,
+                       torch::optional<torch::Tensor> opt_value,
+                       torch::optional<torch::Tensor> opt_colptr,
+                       torch::optional<torch::Tensor> opt_csr2csc,
+                       torch::Tensor mat) {
+  auto value = opt_value.has_value() ? opt_value.value() : col;
+
+//   return fusedmm_spmm_fw(rowptr, col, value, mat);
   return FusedMM_SPMMSum::apply(opt_row, rowptr, col, value, opt_colptr, opt_csr2csc,
                         mat, opt_value.has_value())[0];
 }
 
+
+
 static auto registry = torch::RegisterOperators()
-                           .op("isplib::fusedmm_spmm", &fusedmm_spmm)
+                           .op("isplib::fusedmm_spmm", &fusedmm_spmm_add)
                            .op("isplib::performDummySpMM", &performDummySpMM);
