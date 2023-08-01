@@ -14,14 +14,14 @@ dataset = Planetoid("datasets/Planetoid", name="Cora", transform=T.ToSparseTenso
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv
-from torch_geometric.nn import SAGEConv
+from torch_geometric.nn import SAGEConv, GINConv
 from torch_sparse.tensor import SparseTensor
 
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = GCNConv(dataset.num_node_features, 16, cached=True)
-        self.conv2 = GCNConv(16, dataset.num_classes, cached=True)
+        self.conv1 = SAGEConv(dataset.num_node_features, 16, cached=True)
+        self.conv2 = SAGEConv(16, dataset.num_classes, cached=True)
 
     def forward(self, data):
         x, adj_t = data.x, data.adj_t

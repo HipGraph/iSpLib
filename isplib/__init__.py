@@ -43,6 +43,7 @@ class iSpLibPlugin:
             rowptr, col, value = src.csr()
 
             row = src.storage._row
+            rowcount = src.storage._rowcount
             csr2csc = src.storage._csr2csc
             colptr = src.storage._colptr
 
@@ -54,17 +55,44 @@ class iSpLibPlugin:
 
             if other.requires_grad:
                 row = src.storage.row()
+                rowcount = src.storage.rowcount()
                 csr2csc = src.storage.csr2csc()
                 colptr = src.storage.colptr()
 
             print('Using FusedMM SpMM...')
-            # a = torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other)
-            # b = iSpLibPlugin.backup[1](src_backup, other)
+            # # Max
+            # a = torch.ops.isplib.fusedmm_spmm_max(rowptr, col, value, other)
+            # b = torch.ops.torch_sparse.spmm_max(rowptr, col, value, other)
+            # # b = iSpLibPlugin.backup[1](src_backup, other, "max")
+
+            # # Min
+            # a = torch.ops.isplib.fusedmm_spmm_min(rowptr, col, value, other)
+            # b = torch.ops.torch_sparse.spmm_min(rowptr, col, value, other)
+            # # b = iSpLibPlugin.backup[1](src_backup, other, "min")
+
+            # # Mean
+            # a = torch.ops.isplib.fusedmm_spmm_mean(row, rowptr, col, value, rowcount,
+            #                                 colptr, csr2csc, other)
+            # b = torch.ops.torch_sparse.spmm_mean(row, rowptr, col, value, rowcount,
+            #                                 colptr, csr2csc, other)
+            
             # print('---')
             # print(a)
             # print(b)
             # print('---')
-            return torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other)
+            if reduce in ['sum', 'add']:
+               out = torch.ops.isplib.fusedmm_spmm(row, rowptr, col, value, colptr, csr2csc, other)
+            elif reduce == 'max':
+               out = torch.ops.isplib.fusedmm_spmm_max(rowptr, col, value, other)
+            elif reduce == 'min':
+               out = torch.ops.isplib.fusedmm_spmm_min(rowptr, col, value, other)
+            elif reduce == 'mean':
+               out = torch.ops.isplib.fusedmm_spmm_mean(row, rowptr, col, value, rowcount,
+                                            colptr, csr2csc, other)
+            else:
+               return None
+            
+            return out
             
         iSpLibPlugin.backup.append(torch_sparse.spmm)
         iSpLibPlugin.backup.append(torch.sparse.mm)
