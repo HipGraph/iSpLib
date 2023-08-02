@@ -13,15 +13,14 @@ dataset = Planetoid("datasets/Planetoid", name="Cora", transform=T.ToSparseTenso
 
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
-from torch_geometric.nn import SAGEConv, GINConv
+from torch_geometric.nn import GCNConv, SAGEConv, GINConv
 from torch_sparse.tensor import SparseTensor
 
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.conv1 = SAGEConv(dataset.num_node_features, 16, cached=True)
-        self.conv2 = SAGEConv(16, dataset.num_classes, cached=True)
+        self.conv1 = GCNConv(dataset.num_node_features, 16, cached=True)
+        self.conv2 = GCNConv(16, dataset.num_classes, cached=True)
 
     def forward(self, data):
         x, adj_t = data.x, data.adj_t
@@ -81,6 +80,7 @@ pstats.f8 = f8
 
 # iSpLibPlugin.patch_pyg()
 print("## Training GCN...")
+# cProfile.run('train_GCN()')
 train_GCN()
 print("Done!")
 
@@ -99,7 +99,7 @@ def get_cumulative_time(FusedMM):
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
         p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
-        # print(txt.getvalue())
+        print(txt.getvalue())
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
 
 

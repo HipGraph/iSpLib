@@ -4,7 +4,7 @@ import os.path as osp
 import torch
 import torch_sparse
 # print("OK")
-from torch_sparse import SparseTensor
+from torch_sparse import SparseTensor, matmul
 
 __version__ = '0.1.0'
 
@@ -32,6 +32,7 @@ class iSpLibPlugin:
 
   @classmethod
   def patch_pyg(self):
+    global matmul
     # try:
     # import torch_sparse
     try:
@@ -59,7 +60,8 @@ class iSpLibPlugin:
                 csr2csc = src.storage.csr2csc()
                 colptr = src.storage.colptr()
 
-            print('Using FusedMM SpMM...')
+            # print('Using FusedMM SpMM...')
+            # print(other, reduce)
             # # Max
             # a = torch.ops.isplib.fusedmm_spmm_max(rowptr, col, value, other)
             # b = torch.ops.torch_sparse.spmm_max(rowptr, col, value, other)
@@ -75,7 +77,7 @@ class iSpLibPlugin:
             #                                 colptr, csr2csc, other)
             # b = torch.ops.torch_sparse.spmm_mean(row, rowptr, col, value, rowcount,
             #                                 colptr, csr2csc, other)
-            
+            # print(src, other.size(), reduce)
             # print('---')
             # print(a)
             # print(b)
@@ -96,8 +98,11 @@ class iSpLibPlugin:
             
         iSpLibPlugin.backup.append(torch_sparse.spmm)
         iSpLibPlugin.backup.append(torch.sparse.mm)
+        # iSpLibPlugin.backup.append(torch_sparse.matmul)
         torch_sparse.spmm = spmm_autotuned
         torch.sparse.mm = spmm_autotuned
+        # torch_sparse.matmul = spmm_autotuned
+
         print('>> Autotuner activated')
     # print("Redirected")
     except Exception as e:
@@ -105,7 +110,9 @@ class iSpLibPlugin:
   
   @classmethod
   def unpatch_pyg(self):
+    global matmul
     if len(iSpLibPlugin.backup) > 0:
+    #   torch_sparse.matmul = iSpLibPlugin.backup.pop()
       torch.sparse.mm = iSpLibPlugin.backup.pop()
       torch_sparse.spmm = iSpLibPlugin.backup.pop()
       print('<< Autotuner deactivated')
