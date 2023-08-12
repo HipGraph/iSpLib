@@ -11,3 +11,5 @@ alpha/
 .vscode/
 tests/datasets
 /datasets
+*.txt
+*.xlsx

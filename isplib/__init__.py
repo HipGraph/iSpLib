@@ -103,7 +103,7 @@ class iSpLibPlugin:
         torch.sparse.mm = spmm_autotuned
         # torch_sparse.matmul = spmm_autotuned
 
-        print('>> Autotuner activated')
+        # print('>> Autotuner activated')
     # print("Redirected")
     except Exception as e:
       print("Error! ", str(e))
@@ -115,7 +115,7 @@ class iSpLibPlugin:
     #   torch_sparse.matmul = iSpLibPlugin.backup.pop()
       torch.sparse.mm = iSpLibPlugin.backup.pop()
       torch_sparse.spmm = iSpLibPlugin.backup.pop()
-      print('<< Autotuner deactivated')
+    #   print('<< Autotuner deactivated')
 
 
 def isplib_autotune(fn):
