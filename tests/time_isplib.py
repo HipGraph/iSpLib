@@ -48,7 +48,7 @@ def without_isplib(e):
     # "Total CPU Time: ", 
     total = df['cumtime'].max() / N_RUNS
     # kernel = df[df['func'].str.contains('sparse_mm', na=False)]['cumtime'].values[0] / N_RUNS
-    kernel = df[df['func'].str.contains('torch_sparse.spmm', na=False)]['cumtime'].values[0] / N_RUNS
+    kernel = df[df['func'].str.contains('isplib.spmm_sum', na=False)]['cumtime'].values[0] / N_RUNS
 
     
     # print("WITHOUT ISPLIB:")
