@@ -1,5 +1,10 @@
 from isplib import *
 
+
+import torch_geometric.typing
+torch_geometric.typing.WITH_PT2 = False
+
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -98,7 +103,7 @@ def get_cumulative_time(FusedMM):
         test_GCN()
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
-        p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
+        p.print_stats('torch_sparse.spmm' if not FusedMM else 'isplib.fusedmm_spmm')
         print(txt.getvalue())
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
 

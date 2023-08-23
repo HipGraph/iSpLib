@@ -1,18 +1,24 @@
 from isplib import *
 # Install PyTorch Geometric
+import torch_geometric.typing
+torch_geometric.typing.WITH_PT2 = False
+
+
 import torch
 # !pip install -q torch-scatter -f https://data.pyg.org/whl/torch-{torch.__version__}.html
 # !pip install -q torch-sparse -f https://data.pyg.org/whl/torch-{torch.__version__}.html
 # !pip install -q git+https://github.com/pyg-team/pytorch_geometric.git
 
 # Visualization
-import networkx as nx
-import matplotlib.pyplot as plt
-plt.rcParams['figure.dpi'] = 300
-plt.rcParams.update({'font.size': 24})
+# import networkx as nx
+# import matplotlib.pyplot as plt
+# plt.rcParams['figure.dpi'] = 300
+# plt.rcParams.update({'font.size': 24})
 
 from torch_geometric.datasets import TUDataset
 import torch_geometric.transforms as T
+
+
 
 dataset = TUDataset(root='./datasets', name='PROTEINS', transform=T.ToSparseTensor()).shuffle()
 
@@ -235,7 +241,7 @@ def get_cumulative_time(FusedMM):
         test_GIN()
         txt = io.StringIO()
         p = pstats.Stats(pr, stream=txt)
-        p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
+        p.print_stats('torch_sparse.spmm' if not FusedMM else 'isplib.fusedmm_spmm')
         # print(txt.getvalue())
         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
 

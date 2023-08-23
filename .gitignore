@@ -13,3 +13,7 @@ tests/datasets
 /datasets
 *.txt
 *.xlsx
+csrc/fusedmm/*.a
+*.html
+*.pstats
+*.out

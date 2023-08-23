@@ -1,9 +1,12 @@
 from GCN import GNN
-# from GCN import iSpLibPlugin
+from GCN import iSpLibPlugin
 import cProfile, pstats, io
-import builtins
+# import builtins
+import torch_geometric.typing
 
-N_RUNS = 10     # How many times to repeat the experiment
+
+
+N_RUNS = 1     # How many times to repeat the experiment
 
 # from pstats import SortKey
 # def f8(x):
@@ -25,16 +28,16 @@ N_RUNS = 10     # How many times to repeat the experiment
 
 def run_test(embedding_size):
     g = GNN(embedding_size)
-    g.train_GCN()
-    g.test_GCN()
+    print(g.train_GCN())
+    print(g.test_GCN())
 
 import cProfile
 import pandas as pd
 
 
 def without_isplib(e):
-    builtins.FUSEDMM = False
-    # iSpLibPlugin.unpatch_pyg()
+    # builtins.FUSEDMM = False
+    iSpLibPlugin.unpatch_pyg()
     with cProfile.Profile() as pr:
         for _ in range(N_RUNS):
             run_test(e)
@@ -48,9 +51,10 @@ def without_isplib(e):
     # "Total CPU Time: ", 
     total = df['cumtime'].max() / N_RUNS
     # kernel = df[df['func'].str.contains('sparse_mm', na=False)]['cumtime'].values[0] / N_RUNS
-    kernel = df[df['func'].str.contains('isplib.spmm_sum', na=False)]['cumtime'].values[0] / N_RUNS
+    kernel = df[df['func'].str.contains('torch_sparse.spmm', na=False)]['cumtime'].values[0] / N_RUNS
 
-    
+    df.to_html('out-torchsparse.html')
+
     # print("WITHOUT ISPLIB:")
     # print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
     # print(f"\t{'Total Kernel Time:':20}", f'{kernel:>.3f} seconds')
@@ -58,8 +62,8 @@ def without_isplib(e):
     return total, kernel
 
 def using_isplib(e):
-    builtins.FUSEDMM = True
-    # iSpLibPlugin.patch_pyg()
+    # builtins.FUSEDMM = True
+    iSpLibPlugin.patch_pyg()
 
     with cProfile.Profile() as pr:
         for _ in range(N_RUNS):
@@ -70,8 +74,11 @@ def using_isplib(e):
             columns=['func', 'ncalls', 'ccalls', 'tottime', 'cumtime', 'callers']
         )
     # "Total CPU Time: ", 
+    # print(df)
     total = df['cumtime'].max() / N_RUNS
     kernel = df[df['func'].str.contains('fusedmm', na=False)]['cumtime'].values[0] / N_RUNS
+
+    df.to_html('out-splib.html')
 
     # print("USING ISPLIB:")
     # print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
@@ -89,8 +96,9 @@ def using_isplib(e):
 #     print(f"\t{'CPU Speedup:':20}", f'{a/c:>1.2f}x')
 #     print(f"\t{'Kernel Speedup:':20}", f'{b/d:>1.2f}x')
 
+torch_geometric.typing.WITH_PT2 = False
 data = {}
-for e in [32, 64, 128, 256, 512]:
+for e in [16]:
     # print(f'\n\n==[For embedding size {e}:]==')
     a, b = without_isplib(e)
     c, d = using_isplib(e)
@@ -112,9 +120,10 @@ for e in [32, 64, 128, 256, 512]:
 
 data_df = pd.DataFrame.from_dict({(i, j): data[i][j] for i in data.keys() for j in data[i].keys()}, orient='index')
 data_df.rename_axis(["Embedding_Size", 'Timing'], inplace=True)
+data_df = data_df.swaplevel()
 print(data_df)
 # print(pd.DataFrame.from_dict(data, orient='index'))
-
+data_df.to_csv('summary.txt')
 
 
 # cProfile.run('run_test()')

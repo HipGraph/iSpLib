@@ -5,6 +5,7 @@ import torch
 import torch_sparse
 # print("OK")
 from torch_sparse import SparseTensor, matmul
+import torch_geometric.typing
 
 __version__ = '0.1.0'
 
@@ -37,16 +38,26 @@ class iSpLibPlugin:
     # import torch_sparse
     try:
         def spmm_autotuned(src, other, reduce: str = "sum") -> torch.Tensor:
-            if not isinstance(src, SparseTensor):
-                # print(src)
-                src_backup = src
-                src = torch_sparse.SparseTensor.from_torch_sparse_csr_tensor(src)
+            # print(src)
+            # if not isinstance(src, SparseTensor):
+            #     # print(src)
+            #     src_backup = src
+            #     src = torch_sparse.SparseTensor.from_torch_sparse_csr_tensor(src)
             rowptr, col, value = src.csr()
+            print(src)
+            print('splib', value is None)
 
             row = src.storage._row
             rowcount = src.storage._rowcount
+            # rowcount = None
             csr2csc = src.storage._csr2csc
             colptr = src.storage._colptr
+
+            # if value is None:
+            # #    src.storage._value = torch.ones_like(col)
+            #    value = torch.ones_like(col)
+            # #    print(src.csr())
+            # #    print('updated')
 
             if value is not None:
                 value = value.to(other.dtype)
@@ -59,7 +70,13 @@ class iSpLibPlugin:
                 rowcount = src.storage.rowcount()
                 csr2csc = src.storage.csr2csc()
                 colptr = src.storage.colptr()
-
+            
+            # for i in [row, rowptr, col, value, rowcount, colptr, csr2csc, other]:
+            #       if i is None:
+            #          print(None)
+            #       else:
+            #          print(i.dtype)
+            # print()
             # print('Using FusedMM SpMM...')
             # print(other, reduce)
             # # Max
@@ -89,18 +106,25 @@ class iSpLibPlugin:
             elif reduce == 'min':
                out = torch.ops.isplib.fusedmm_spmm_min(rowptr, col, value, other)
             elif reduce == 'mean':
-               out = torch.ops.isplib.fusedmm_spmm_mean(row, rowptr, col, value, rowcount,
-                                            colptr, csr2csc, other)
+            #    print(row.dtype, rowptr.dtype, col.dtype, value, rowcount, colptr, csr2csc, other.dtype)
+               
+            #    print('Torchsparse output: ')
+            #    print(torch.ops.torch_sparse.spmm_mean(row, rowptr, col, value, rowcount, colptr, csr2csc, other))
+               out = torch.ops.isplib.fusedmm_spmm_mean(row, rowptr, col, value, rowcount, colptr, csr2csc, other)
+            #    out = torch.ops.torch_sparse.spmm_mean(row, rowptr, col, value, rowcount, colptr, csr2csc, other)
+               
             else:
                return None
             
             return out
             
-        iSpLibPlugin.backup.append(torch_sparse.spmm)
+        iSpLibPlugin.backup.append(torch_sparse.matmul)
         iSpLibPlugin.backup.append(torch.sparse.mm)
+        # iSpLibPlugin.backup.append(torch_geometric.typing.WITH_PT2)
         # iSpLibPlugin.backup.append(torch_sparse.matmul)
-        torch_sparse.spmm = spmm_autotuned
+        torch_sparse.matmul = spmm_autotuned
         torch.sparse.mm = spmm_autotuned
+        # torch_geometric.typing.WITH_PT2 = False
         # torch_sparse.matmul = spmm_autotuned
 
         # print('>> Autotuner activated')
@@ -112,9 +136,11 @@ class iSpLibPlugin:
   def unpatch_pyg(self):
     global matmul
     if len(iSpLibPlugin.backup) > 0:
-    #   torch_sparse.matmul = iSpLibPlugin.backup.pop()
+      # torch_sparse.matmul = iSpLibPlugin.backup.pop()
+    #   iSpLibPlugin.backup.pop()
+    #   torch_geometric.typing.WITH_PT2 = iSpLibPlugin.backup.pop()
       torch.sparse.mm = iSpLibPlugin.backup.pop()
-      torch_sparse.spmm = iSpLibPlugin.backup.pop()
+      torch_sparse.matmul = iSpLibPlugin.backup.pop()
     #   print('<< Autotuner deactivated')
 
 
