@@ -169,4 +169,4 @@ print(data_df)
 
 if WRITE_RESULTS_TO_FILE:
     data_df.to_csv(f'{OUTPUT_FOLDER}/summary.csv')
-    print(f'\nResults dumped in folder: {OUTPUT_FOLDER}')
+    print(f'\nResults dumped in folder: ./{OUTPUT_FOLDER}')
