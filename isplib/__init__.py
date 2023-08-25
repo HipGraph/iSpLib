@@ -38,14 +38,15 @@ class iSpLibPlugin:
     # import torch_sparse
     try:
         def spmm_autotuned(src, other, reduce: str = "sum") -> torch.Tensor:
-            # print(src)
+            # print(src.csr())
             # if not isinstance(src, SparseTensor):
             #     # print(src)
             #     src_backup = src
             #     src = torch_sparse.SparseTensor.from_torch_sparse_csr_tensor(src)
             rowptr, col, value = src.csr()
-            print(src)
-            print('splib', value is None)
+
+            # print('isplib', value is not None)
+            # print('splib', value is None)
 
             row = src.storage._row
             rowcount = src.storage._rowcount

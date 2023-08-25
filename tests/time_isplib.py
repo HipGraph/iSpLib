@@ -3,36 +3,70 @@ from GCN import iSpLibPlugin
 import cProfile, pstats, io
 # import builtins
 import torch_geometric.typing
-
-
-
-N_RUNS = 1     # How many times to repeat the experiment
-
-# from pstats import SortKey
-# def f8(x):
-#     # Source: https://gist.github.com/romuald/0346c76cfbbbceb3e4d1
-#     ret = "%8.6f" % x
-#     if ret != '   0.000':
-#         return ret
-#     return "%6dµs" % (x * 1000000)
-
-# pstats.f8 = f8
-
-# callcount: number of times called
-# recallcount: number of times recursively called
-# totaltime: total time spent in the function
-# inlinetime: time spent in the function but not in subcalls respectively
-# Source: https://zameermanji.com/blog/2012/6/30/undocumented-cprofile-features/
-
-
-
-def run_test(embedding_size):
-    g = GNN(embedding_size)
-    print(g.train_GCN())
-    print(g.test_GCN())
-
 import cProfile
 import pandas as pd
+import datetime
+
+import sys, os, subprocess
+from tqdm import tqdm
+
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+torch_geometric.typing.WITH_PT2 = False
+
+# module load gcc; module load anaconda; source activate py39
+# python tests/time_isplib.py gcn cora 1 10
+# python tests/time_isplib.py gcn reddit 5 100
+
+# Params ------------------------------------------------------------------------
+
+EMBEDDINGS = [16, 32, 64, 128, 256]
+DEVICE = 'cpu'
+WRITE_RESULTS_TO_FILE = True
+
+GPROF_PATH = f'results/gprof2dot.py'
+GENERATE_GRAPH = True
+PYTHON = 'python'
+# To visualize: python -m snakeviz prof.pstats
+
+DEBUG = False
+
+# ---
+
+GNN_TYPE = sys.argv[1]
+DATASET_NAME = sys.argv[2]
+N_RUNS = int(sys.argv[3])     # How many times to repeat the experiment
+EPOCH_COUNT = int(sys.argv[4])
+
+# GNN_TYPE = 'gcn'
+# DATASET_NAME = 'cora'
+# N_RUNS = 1     # How many times to repeat the experiment
+# EPOCH_COUNT = 10
+
+NOW = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+_EMBEDDINGS_STR = '-'.join(str(v) for v in EMBEDDINGS)
+EXPERIMENT_NAME = f'{NOW}_{GNN_TYPE}-{DATASET_NAME}-EMB[{_EMBEDDINGS_STR}]N{N_RUNS}E{EPOCH_COUNT}_{DEVICE}'
+OUTPUT_FOLDER = f'results/{EXPERIMENT_NAME}'
+
+if GENERATE_GRAPH and not os.path.isfile(GPROF_PATH):
+    print("Error: gprof2dot not found. Please put gprof2dot.py in ./results folder and run script again!\n---\nDownload: https://raw.githubusercontent.com/jrfonseca/gprof2dot/master/gprof2dot.py \n---\n")
+    GENERATE_GRAPH = False
+
+if GENERATE_GRAPH:
+    WRITE_RESULTS_TO_FILE = True
+
+if WRITE_RESULTS_TO_FILE:
+    os.makedirs(OUTPUT_FOLDER)
+
+
+# -----------------------------------------------------------------------------------
+
+print("Running experiment:", EXPERIMENT_NAME)
+def run_test(embedding_size):
+    g = GNN(embedding_size, GNN_TYPE, DATASET_NAME, EPOCH_COUNT, DEVICE)
+    a = g.train_GCN()
+    b = g.test_GCN()
+    if DEBUG:
+        print('Accuracy: ', a, b)
 
 
 def without_isplib(e):
@@ -48,16 +82,24 @@ def without_isplib(e):
             pr.getstats(),
             columns=['func', 'ncalls', 'ccalls', 'tottime', 'cumtime', 'callers']
         )
+        if WRITE_RESULTS_TO_FILE:
+            pr.dump_stats(f'{OUTPUT_FOLDER}/non-isplib-E{e}.pstats')
+    if GENERATE_GRAPH:
+        subprocess.Popen(f'{PYTHON} {GPROF_PATH} -f pstats {OUTPUT_FOLDER}/non-isplib-E{e}.pstats | dot -Tpng -o {OUTPUT_FOLDER}/non-isplib-E{e}.png', shell=True)
+
     # "Total CPU Time: ", 
-    total = df['cumtime'].max() / N_RUNS
+    total = max(df['cumtime'].max(), df['tottime'].max()) / N_RUNS
     # kernel = df[df['func'].str.contains('sparse_mm', na=False)]['cumtime'].values[0] / N_RUNS
     kernel = df[df['func'].str.contains('torch_sparse.spmm', na=False)]['cumtime'].values[0] / N_RUNS
-
-    df.to_html('out-torchsparse.html')
-
-    # print("WITHOUT ISPLIB:")
-    # print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
-    # print(f"\t{'Total Kernel Time:':20}", f'{kernel:>.3f} seconds')
+    
+    df.sort_values(['cumtime', 'tottime', 'ncalls'], ascending=False, inplace=True)
+    if WRITE_RESULTS_TO_FILE:
+        df.to_html(f'{OUTPUT_FOLDER}/non-isplib-E{e}.html')
+    # print(df)
+    if DEBUG:
+        print("WITHOUT ISPLIB:")
+        print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
+        print(f"\t{'Total Kernel Time:':20}", f'{kernel:>.3f} seconds')
 
     return total, kernel
 
@@ -73,35 +115,33 @@ def using_isplib(e):
             pr.getstats(),
             columns=['func', 'ncalls', 'ccalls', 'tottime', 'cumtime', 'callers']
         )
+        if WRITE_RESULTS_TO_FILE:
+            pr.dump_stats(f'{OUTPUT_FOLDER}/isplib-E{e}.pstats')
+    
+    if GENERATE_GRAPH:
+        subprocess.Popen(f'{PYTHON} {GPROF_PATH} -f pstats {OUTPUT_FOLDER}/isplib-E{e}.pstats | dot -Tpng -o {OUTPUT_FOLDER}/isplib-E{e}.png', shell=True)
+
     # "Total CPU Time: ", 
     # print(df)
-    total = df['cumtime'].max() / N_RUNS
+    total = max(df['cumtime'].max(), df['tottime'].max()) / N_RUNS
     kernel = df[df['func'].str.contains('fusedmm', na=False)]['cumtime'].values[0] / N_RUNS
-
-    df.to_html('out-splib.html')
-
-    # print("USING ISPLIB:")
-    # print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
-    # print(f"\t{'Total Kernel Time:':20}", f'{kernel:>.3f} seconds')
-    
+    df.sort_values(['cumtime', 'tottime', 'ncalls'], ascending=False, inplace=True)
+    # df.to_html('out-splib-gcn.html')
+    if WRITE_RESULTS_TO_FILE:
+        df.to_html(f'{OUTPUT_FOLDER}/isplib-E{e}.html')
+    if DEBUG: 
+        print("USING ISPLIB:")
+        print(f"\t{'Total CPU Time:':20}", f'{total:>.3f} seconds')
+        print(f"\t{'Total Kernel Time:':20}", f'{kernel:>.3f} seconds')    
     return total, kernel
 
 
-# for e in [32, 64, 128, 256, 512]:
-#     print(f'\n\n==[For embedding size {e}:]==')
-#     a, b = without_isplib(e)
-#     c, d = using_isplib(e)
 
-#     print('===')
-#     print(f"\t{'CPU Speedup:':20}", f'{a/c:>1.2f}x')
-#     print(f"\t{'Kernel Speedup:':20}", f'{b/d:>1.2f}x')
-
-torch_geometric.typing.WITH_PT2 = False
 data = {}
-for e in [16]:
+for e in tqdm(EMBEDDINGS):
     # print(f'\n\n==[For embedding size {e}:]==')
-    a, b = without_isplib(e)
     c, d = using_isplib(e)
+    a, b = without_isplib(e)
     data[e] = {
         'CPU Time': {
             'Non-iSpLib': a,
@@ -120,73 +160,13 @@ for e in [16]:
 
 data_df = pd.DataFrame.from_dict({(i, j): data[i][j] for i in data.keys() for j in data[i].keys()}, orient='index')
 data_df.rename_axis(["Embedding_Size", 'Timing'], inplace=True)
+
 data_df = data_df.swaplevel()
+data_df = data_df.groupby("Timing", as_index=False).apply(lambda x: x)
+
+print("\n Experiment Name:", EXPERIMENT_NAME, '\n')
 print(data_df)
-# print(pd.DataFrame.from_dict(data, orient='index'))
-data_df.to_csv('summary.txt')
 
-
-# cProfile.run('run_test()')
-
-
-
-# df.to_excel('out.xlsx')
-# with open('out.txt') as f:
-#     for i in pr.getstats():
-#         f.write(i)
-
-# for i in pr.getstats():
-#     print(i)
-
-# >>> print(df[df['func'].str.contains('sparse_mm', na=False)])
-
-
-
-# iSpLibPlugin.patch_pyg()
-# cProfile.run('run_test()')
-
-
-
-# # iSpLibPlugin.patch_pyg()
-# print("## Training GCN...")
-# # cProfile.run('train_GCN()')
-# train_GCN()
-# print("Done!")
-
-# print("## Testing GCN...")
-# print("Accuracy without FusedMM: ", test_GCN())
-
-# iSpLibPlugin.patch_pyg()
-# print("Accuracy with FusedMM: ", test_GCN())
-# iSpLibPlugin.unpatch_pyg()
-
-# import io
-
-# def get_cumulative_time(FusedMM):
-#     with cProfile.Profile() as pr:
-#         test_GCN()
-#         txt = io.StringIO()
-#         p = pstats.Stats(pr, stream=txt)
-#         p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
-#         # print(txt.getvalue())
-#         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
-
-# from tqdm import tqdm
-
-
-# a = []
-# b = []
-# c = []
-# print('TorchOp', 'FusedMM', 'Speedup', sep='\t')
-# for i in range(1000):
-#     torch_op_time = float(get_cumulative_time(False))
-
-#     iSpLibPlugin.patch_pyg()
-#     fusedmm_time = float(get_cumulative_time(True))
-#     iSpLibPlugin.unpatch_pyg()
-
-
-#     speedup = torch_op_time / fusedmm_time
-
-#     print(f'{torch_op_time:3}', f'{fusedmm_time:.3}', f'{speedup:.3}', sep='\t')
-    
+if WRITE_RESULTS_TO_FILE:
+    data_df.to_csv(f'{OUTPUT_FOLDER}/summary.csv')
+    print(f'\nResults dumped in folder: {OUTPUT_FOLDER}')

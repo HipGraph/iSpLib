@@ -17,3 +17,5 @@ csrc/fusedmm/*.a
 *.html
 *.pstats
 *.out
+results/
+tests/results/
