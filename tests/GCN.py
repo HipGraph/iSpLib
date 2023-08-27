@@ -14,7 +14,7 @@ import torch_geometric.transforms as T
 import inspect
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, SAGEConv, GINConv
+from torch_geometric.nn import GCNConv, SAGEConv, GINConv, GATConv
 # from torch_sparse.tensor import SparseTensor
 
 
@@ -37,6 +37,12 @@ class Net(torch.nn.Module):
         elif gnn_type == 'sage':
             self.conv1 = SAGEConv(dataset.num_node_features, embedding_size, cached=True)
             self.conv2 = SAGEConv(embedding_size, dataset.num_classes, cached=True)
+        # elif gnn_type == 'gin':
+        #     self.conv1 = GINConv(dataset.num_node_features, embedding_size, cached=True)
+        #     self.conv2 = GINConv(embedding_size, dataset.num_classes, cached=True)
+        # elif gnn_type == 'gat':
+        #     self.conv1 = GATConv(dataset.num_node_features, embedding_size, cached=True)
+        #     self.conv2 = GATConv(embedding_size, dataset.num_classes, cached=True)
 
     def forward(self, data):
         # print(data.adj_t)
@@ -95,77 +101,3 @@ class GNN:
         # print('Accuracy: {:.4f}'.format(acc))
         return acc
 
-
-# import cProfile, pstats
-# from pstats import SortKey
-
-# # https://gist.github.com/romuald/0346c76cfbbbceb3e4d1
-
-# def f8(x):
-#     ret = "%8.6f" % x
-#     if ret != '   0.000':
-#         return ret
-#     return "%6dµs" % (x * 1000000)
-
-# pstats.f8 = f8
-
-# # iSpLibPlugin.patch_pyg()
-# print("## Training GCN...")
-# # cProfile.run('train_GCN()')
-# train_GCN()
-# print("Done!")
-
-# print("## Testing GCN...")
-# print("Accuracy without FusedMM: ", test_GCN())
-
-# iSpLibPlugin.patch_pyg()
-# print("Accuracy with FusedMM: ", test_GCN())
-# iSpLibPlugin.unpatch_pyg()
-
-# import io
-
-# def get_cumulative_time(FusedMM):
-#     with cProfile.Profile() as pr:
-#         test_GCN()
-#         txt = io.StringIO()
-#         p = pstats.Stats(pr, stream=txt)
-#         p.print_stats('sparse.mm' if not FusedMM else 'isplib.fusedmm_spmm')
-#         # print(txt.getvalue())
-#         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
-
-# from tqdm import tqdm
-
-
-# a = []
-# b = []
-# c = []
-# print('TorchOp', 'FusedMM', 'Speedup', sep='\t')
-# for i in range(1000):
-#     torch_op_time = float(get_cumulative_time(False))
-
-#     iSpLibPlugin.patch_pyg()
-#     fusedmm_time = float(get_cumulative_time(True))
-#     iSpLibPlugin.unpatch_pyg()
-
-
-#     speedup = torch_op_time / fusedmm_time
-
-#     print(f'{torch_op_time:3}', f'{fusedmm_time:.3}', f'{speedup:.3}', sep='\t')
-    
-
-
-# torch.ops.isplib.performDummySpMM(3)
-
-# torch_op_time = float(get_cumulative_time(False))
-
-# iSpLibPlugin.patch_pyg()
-# fusedmm_time = float(get_cumulative_time(True))
-# iSpLibPlugin.unpatch_pyg()
-
-# speedup = torch_op_time / fusedmm_time
-
-# print("Non-FusedMM SpMM time: ", torch_op_time, 'seconds')
-# print("FusedMM SpMM time: ", fusedmm_time, 'seconds')
-# print()
-# print("Speedup: ", f'{speedup:.3}x')
-# # torch.ops.isplib.performDummySpMM(3)

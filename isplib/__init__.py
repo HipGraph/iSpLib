@@ -44,7 +44,9 @@ class iSpLibPlugin:
             #     src_backup = src
             #     src = torch_sparse.SparseTensor.from_torch_sparse_csr_tensor(src)
             rowptr, col, value = src.csr()
-
+            if value is None:
+               value = torch.ones_like(col, dtype=torch.float32)
+               print('updated')
             # print('isplib', value is not None)
             # print('splib', value is None)
 

@@ -19,12 +19,12 @@ torch_geometric.typing.WITH_PT2 = False
 
 # Params ------------------------------------------------------------------------
 
-EMBEDDINGS = [16, 32, 64, 128, 256]
+EMBEDDINGS = [16]
 DEVICE = 'cpu'
-WRITE_RESULTS_TO_FILE = True
+WRITE_RESULTS_TO_FILE = False
 
 GPROF_PATH = f'results/gprof2dot.py'
-GENERATE_GRAPH = True
+GENERATE_GRAPH = False
 PYTHON = 'python'
 # To visualize: python -m snakeviz prof.pstats
 
