@@ -46,7 +46,7 @@ class iSpLibPlugin:
             rowptr, col, value = src.csr()
             if value is None:
                value = torch.ones_like(col, dtype=torch.float32)
-               print('updated')
+            #    print('updated')
             # print('isplib', value is not None)
             # print('splib', value is None)
 

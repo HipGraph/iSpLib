@@ -20,11 +20,14 @@ import torch_geometric.transforms as T
 
 torch_geometric.typing.WITH_PT2 = False
 
-dataset = TUDataset(root='./datasets', name='PROTEINS', transform=T.ToSparseTensor()).shuffle()
 
 from torch_geometric.loader import DataLoader
 
+dataset = TUDataset(root='./datasets', name='PROTEINS', transform=T.ToSparseTensor()).shuffle()
 # Create training, validation, and test sets
+# if dataset.adj_t.csr()[2] is None:
+#     dataset.adj_t.storage.set_value_(torch.ones_like(dataset.adj_t.storage.col(), dtype=torch.float32), 'csr')
+
 train_dataset = dataset[:int(len(dataset)*0.8)]
 val_dataset   = dataset[int(len(dataset)*0.8):int(len(dataset)*0.9)]
 test_dataset  = dataset[int(len(dataset)*0.9):]
@@ -41,10 +44,10 @@ from torch.nn import Linear, Sequential, BatchNorm1d, ReLU, Dropout
 from torch_geometric.nn import GCNConv, GINConv
 from torch_geometric.nn import global_mean_pool, global_add_pool
 
-class GIN(torch.nn.Module):
+class GIN_Net(torch.nn.Module):
     """GIN"""
     def __init__(self, dim_h):
-        super(GIN, self).__init__()
+        super(GIN_Net, self).__init__()
         self.conv1 = GINConv(
             Sequential(Linear(dataset.num_node_features, dim_h),
                        BatchNorm1d(dim_h), ReLU(),
@@ -81,18 +84,19 @@ class GIN(torch.nn.Module):
         return h, F.log_softmax(h, dim=1)
 
 # gcn = GCN(dim_h=32)
-gin = GIN(dim_h=16)
+# gin = GIN_Net(dim_h=16)
 
 
 def train(model, loader):
+    global EPOCH
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(),
                                       lr=0.01,
                                       weight_decay=0.01)
-    epochs = 10
+    # epochs = 10
 
     model.train()
-    for epoch in range(epochs+1):
+    for _ in range(EPOCH+1):
         total_loss = 0
         acc = 0
         val_loss = 0
@@ -100,6 +104,8 @@ def train(model, loader):
 
         # Train on batches
         for data in loader:
+          if data.adj_t.csr()[2] is None:
+            data.adj_t.storage.set_value_(torch.ones_like(data.adj_t.storage.col(), dtype=torch.float32), 'csr')
           optimizer.zero_grad()
           _, out = model(data.x, data.adj_t, data.batch)
           loss = criterion(out, data.y)
@@ -112,16 +118,16 @@ def train(model, loader):
           val_loss, val_acc = test(model, val_loader)
 
     # Print metrics every 10 epochs
-    if(epoch % 10 == 0):
-        print(f'Epoch {epoch:>3} | Train Loss: {total_loss:.2f} '
-              f'| Train Acc: {acc*100:>5.2f}% '
-              f'| Val Loss: {val_loss:.2f} '
-              f'| Val Acc: {val_acc*100:.2f}%')
+    # if(epoch % 10 == 0):
+    #     print(f'Epoch {epoch:>3} | Train Loss: {total_loss:.2f} '
+    #           f'| Train Acc: {acc*100:>5.2f}% '
+    #           f'| Val Loss: {val_loss:.2f} '
+    #           f'| Val Acc: {val_acc*100:.2f}%')
           
     test_loss, test_acc = test(model, test_loader)
-    print(f'Test Loss: {test_loss:.2f} | Test Acc: {test_acc*100:.2f}%')
+    # print(f'Test Loss: {test_loss:.2f} | Test Acc: {test_acc*100:.2f}%')
     
-    return model
+    return model, test_acc
 
 @torch.no_grad()
 def test(model, loader):
@@ -131,6 +137,8 @@ def test(model, loader):
     acc = 0
 
     for data in loader:
+        if data.adj_t.csr()[2] is None:
+            data.adj_t.storage.set_value_(torch.ones_like(data.adj_t.storage.col(), dtype=torch.float32), 'csr')
         _, out = model(data.x, data.adj_t, data.batch)
         loss += criterion(out, data.y) / len(loader)
         acc += accuracy(out.argmax(dim=1), data.y) / len(loader)
@@ -146,13 +154,16 @@ def accuracy(pred_y, y):
 # print(matmul)
 # gcn = train(gcn, train_loader)
 
-import cProfile
+# import cProfile
+
+
+
 
 # cProfile.run('gin = train(gin, train_loader)')
-iSpLibPlugin.patch_pyg()
-gin = train(gin, train_loader)
-iSpLibPlugin.unpatch_pyg()
-gin.eval()
+# iSpLibPlugin.patch_pyg()
+# gin = train(gin, train_loader)
+# iSpLibPlugin.unpatch_pyg()
+# gin.eval()
 
 def test_GIN():
     acc_gin = 0
@@ -164,43 +175,61 @@ def test_GIN():
         acc_gin += accuracy(out_gin.argmax(dim=1), data.y) / len(test_loader)
     return acc_gin
 
+gin = None
+EPOCH = None
+
+class GIN:
+    def __init__(self, emb_side, epoch_count) -> None:
+        global gin, EPOCH
+        gin = GIN_Net(dim_h=emb_side)
+        EPOCH = epoch_count
+    
+    def run_training(self):
+        global gin, train_loader
+        gin, acc = train(gin, train_loader)
+        return acc
+    
+    def run_test(self):
+        global gin
+        gin.eval()
+        return test_GIN()
 
 # print(f'GIN accuracy:     {acc_gin*100:.2f}%')
 
-import cProfile, pstats
-from pstats import SortKey
+# import cProfile, pstats
+# from pstats import SortKey
 
-# https://gist.github.com/romuald/0346c76cfbbbceb3e4d1
+# # https://gist.github.com/romuald/0346c76cfbbbceb3e4d1
 
-def f8(x):
-    ret = "%8.6f" % x
-    if ret != '   0.000':
-        return ret
-    return "%6dµs" % (x * 1000000)
+# def f8(x):
+#     ret = "%8.6f" % x
+#     if ret != '   0.000':
+#         return ret
+#     return "%6dµs" % (x * 1000000)
 
-pstats.f8 = f8
+# pstats.f8 = f8
 
-import io
+# import io
 
-def get_cumulative_time(FusedMM):
-    with cProfile.Profile() as pr:
-        test_GIN()
-        txt = io.StringIO()
-        p = pstats.Stats(pr, stream=txt)
-        p.print_stats('torch_sparse.spmm' if not FusedMM else 'isplib.fusedmm_spmm')
-        # print(txt.getvalue())
-        return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
+# def get_cumulative_time(FusedMM):
+#     with cProfile.Profile() as pr:
+#         test_GIN()
+#         txt = io.StringIO()
+#         p = pstats.Stats(pr, stream=txt)
+#         p.print_stats('torch_sparse.spmm' if not FusedMM else 'isplib.fusedmm_spmm')
+#         # print(txt.getvalue())
+#         return txt.getvalue().strip().split('\n')[-1].split(' ')[-4]
 
 
-torch_op_time = float(get_cumulative_time(False))
+# torch_op_time = float(get_cumulative_time(False))
 
-iSpLibPlugin.patch_pyg()
-fusedmm_time = float(get_cumulative_time(True))
-iSpLibPlugin.unpatch_pyg()
+# iSpLibPlugin.patch_pyg()
+# fusedmm_time = float(get_cumulative_time(True))
+# iSpLibPlugin.unpatch_pyg()
 
-speedup = torch_op_time / fusedmm_time
+# speedup = torch_op_time / fusedmm_time
 
-print("Non-FusedMM SpMM time: ", torch_op_time, 'seconds')
-print("FusedMM SpMM time: ", fusedmm_time, 'seconds')
-print()
-print("Speedup: ", f'{speedup:.3}x')
+# print("Non-FusedMM SpMM time: ", torch_op_time, 'seconds')
+# print("FusedMM SpMM time: ", fusedmm_time, 'seconds')
+# print()
+# print("Speedup: ", f'{speedup:.3}x')

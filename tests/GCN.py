@@ -15,6 +15,7 @@ import inspect
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, SAGEConv, GINConv, GATConv
+from GIN import GIN
 # from torch_sparse.tensor import SparseTensor
 
 
@@ -59,7 +60,7 @@ class Net(torch.nn.Module):
         return F.log_softmax(x, dim=1)
 
 
-class GNN:
+class GCN:
     def __init__(self, emb_size, gnn_type='gcn', dataset_name='cora', epoch_count = 10, device='cpu') -> None:
         dataset = get_dataset(dataset_name)
         self.device = torch.device(device)
@@ -72,7 +73,7 @@ class GNN:
             # print('updated')
         # print("GNN init", self.data.adj_t.csr()[2] is None)
    
-    def train_GCN(self):
+    def run_training(self):
         optimizer = torch.optim.Adam(self.model.parameters(), lr=0.01, weight_decay=5e-4)
         self.model.train()
 
@@ -94,10 +95,24 @@ class GNN:
         return acc
 
     # def test_GCN(FusedMM):
-    def test_GCN(self):
+    def run_test(self):
         _, pred = self.model(self.data).max(dim=1)
         correct = float (pred[self.data.test_mask].eq(self.data.y[self.data.test_mask]).sum().item())
         acc = correct / self.data.test_mask.sum().item()
         # print('Accuracy: {:.4f}'.format(acc))
         return acc
 
+class GNN:
+    def __init__(self, emb_size, gnn_type='gcn', dataset_name='cora', epoch_count = 10, device='cpu') -> None:
+        if gnn_type in ['gcn', 'sage']:
+            self.g = GCN(emb_size, gnn_type, dataset_name, epoch_count, device)
+        elif gnn_type == 'gin':
+            self.g = GIN(emb_size, epoch_count)
+        else:
+            raise Exception("Error! Unknown GNN type. Supported are: GCN, GraphSAGE, and GIN.")
+    def train_GCN(self):
+        return self.g.run_training()
+    
+    def test_GCN(self):
+        return self.g.run_test()
+        

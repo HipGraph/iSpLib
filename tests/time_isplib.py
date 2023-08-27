@@ -19,12 +19,12 @@ torch_geometric.typing.WITH_PT2 = False
 
 # Params ------------------------------------------------------------------------
 
-EMBEDDINGS = [16]
+EMBEDDINGS = [16, 32, 64, 128, 256]
 DEVICE = 'cpu'
-WRITE_RESULTS_TO_FILE = False
+WRITE_RESULTS_TO_FILE = True
 
 GPROF_PATH = f'results/gprof2dot.py'
-GENERATE_GRAPH = False
+GENERATE_GRAPH = True
 PYTHON = 'python'
 # To visualize: python -m snakeviz prof.pstats
 
@@ -61,6 +61,7 @@ if WRITE_RESULTS_TO_FILE:
 # -----------------------------------------------------------------------------------
 
 print("Running experiment:", EXPERIMENT_NAME)
+print(f"WRITE_RESULTS_TO_FILE={WRITE_RESULTS_TO_FILE}, GENERATE_GRAPH={GENERATE_GRAPH}, DEBUG={DEBUG}")
 def run_test(embedding_size):
     g = GNN(embedding_size, GNN_TYPE, DATASET_NAME, EPOCH_COUNT, DEVICE)
     a = g.train_GCN()
