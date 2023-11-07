@@ -1,4 +1,7 @@
 import torch
+torch.manual_seed(0)
+torch.cuda.manual_seed(0)
+torch.cuda.manual_seed_all(0)
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision
