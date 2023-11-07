@@ -83,6 +83,30 @@ int fusedMM_csr
    const INDEXTYPE ldz,        // leading dimension size of z 
    INDEXTYPE *z_arg
 );
+
+void fusedmm_cuda
+(
+   const char tkern,       // kernel variations
+   const INDEXTYPE m,      // rows of A 
+   const INDEXTYPE n,      // rows of B
+   const INDEXTYPE k,      // dimension: col of A and B
+   const VALUETYPE alpha,  // not used yet  
+   const INDEXTYPE nnz,    // nonzeros  
+   const INDEXTYPE rows,   // number of rows for sparse matrix 
+   const INDEXTYPE cols,   // number of columns for sparse matrix 
+   const VALUETYPE *val,   // NNZ value  
+   const INDEXTYPE *indx,  // colids -> column indices 
+   const INDEXTYPE *pntrb, // starting index for rowptr
+   const INDEXTYPE *pntre, // ending index for rowptr
+   const VALUETYPE *a,     // Dense A (X) matrix
+   const INDEXTYPE lda,    // leading dimension of A (col size since A row-major)  
+   const VALUETYPE *b,     // Dense B matrix
+   const INDEXTYPE ldb,    // leading dimension of B (col size since B row-major)  
+   const VALUETYPE beta,   // beta value 
+   VALUETYPE *c,           // Dense matrix c
+   const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
+);
+
 }
 
 
@@ -164,8 +188,16 @@ std::tuple<torch::Tensor, torch::optional<torch::Tensor>> fusedmm_spmm_fw(torch:
     // std::cout << "imsg: " << imsg << std::endl;
     
 	  start = std::chrono::system_clock::now();
-    fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc, c_idx);
-    
+    if (rowptr.device().is_cuda())
+    {
+      std::cout << "Invoking FusedMM CUDA\n" ;
+      const char tkern = 'm';
+      fusedmm_cuda(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
+    }
+    else{
+      fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc, c_idx);
+    }
+
     if (std::getenv("FUSEDMM_DEBUG_ALL"))
       printf("\nFUSEDMM_ONLY: %.8lf\n", elapsed_seconds.count());
     return std::make_tuple(out, out_arg);
