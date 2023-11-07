@@ -15,7 +15,7 @@ from torch.utils.cpp_extension import (
     CUDAExtension,
 )
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 URL = 'https://github.com/HipGraph/iSpLib'
 
 WITH_CUDA = False
@@ -122,7 +122,8 @@ def get_extensions():
         extra_objects = []
         
         if FUSEDMM:
-            extra_objects += ['csrc/fusedmm/libmyfusedmm.a']
+            extra_objects += [f'csrc/fusedmm/{i}' for i in os.listdir('csrc/fusedmm/') if i[-2:] == '.a']
+            # extra_objects += ['csrc/fusedmm/fusedmm_cpu.a','csrc/fusedmm/fusedmm_gpu.a']
             extra_compile_args['cxx'] += ["-O3", "-march=native", "-Wall", "-lm", "-fopenmp"]
             extra_link_args += ['-lgomp']
             
@@ -144,12 +145,11 @@ def get_extensions():
 
 
 install_requires = [
-    'scipy',
+    
 ]
 
 test_requires = [
-    'pytest',
-    'pytest-cov',
+    
 ]
 
 # work-around hipify abs paths
@@ -180,7 +180,7 @@ setup(
     ext_modules=get_extensions() if not BUILD_DOCS else [],
     cmdclass={
         'build_ext':
-        BuildExtension.with_options(no_python_abi_suffix=True, use_ninja=False)
+        BuildExtension.with_options(no_python_abi_suffix=False, use_ninja=False)
     },
     packages=find_packages(),
     include_package_data=include_package_data,

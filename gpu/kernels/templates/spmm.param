@@ -1,0 +1,26 @@
+{
+    'name': '[[blocksize]]',
+    'start': 1,
+    'end': '[[MAX_THREAD]]',
+    'step': 1,
+    'count': 16,
+    'prototype': '''void gfusedMM_bl[[blocksize]]_spmm_csr (const char transa, const INDEXTYPE m, const INDEXTYPE n, 
+      const INDEXTYPE k,const float alpha, const INDEXTYPE nnz, 
+      const INDEXTYPE rows, const INDEXTYPE cols, const float *val, const INDEXTYPE *indx, 
+      const INDEXTYPE *pntrb, const INDEXTYPE *pntre, const float *A, 
+      const INDEXTYPE lda, const float *B, const INDEXTYPE ldb, 
+      const float beta, float *C, const INDEXTYPE ldc);''',
+    
+    'function_names': 'gfusedMM_bl[[blocksize]]_spmm_csr',
+
+    'typedef': '''#define SPMM_KERNEL_COUNT 16
+        
+    typedef void (*gfusedMM_spmm_t) ( const char transa, const INDEXTYPE m, 
+      const INDEXTYPE n, const INDEXTYPE k,const float alpha, const INDEXTYPE nnz, 
+      const INDEXTYPE rows, const INDEXTYPE cols, const float *val, const INDEXTYPE *indx, 
+      const INDEXTYPE *pntrb, const INDEXTYPE *pntre, const float *A, 
+      const INDEXTYPE lda, const float *B, const INDEXTYPE ldb, 
+      const float beta, float *C, const INDEXTYPE ldc);''',
+    
+    'array_pointer': 'gfusedMM_spmm_t gfusedMM_spmm[] = { [[function_names]] };'
+}

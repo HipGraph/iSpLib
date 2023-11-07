@@ -1,0 +1,53 @@
+__global__ void gcfusedMM_bl[[blocksize]]_spmm_csr (int m, int n, int k, int nnz, 
+                               const int64_t* indx, const int64_t* ptrb, const float* val, 
+                               const float* b, float* c,  int nnz_per_block)
+{
+     int nnz_start = blockIdx.x * nnz_per_block;
+    int nnz_end = min(nnz_start + nnz_per_block, nnz);
+
+    for (int i = nnz_start; i < nnz_end; i++) {
+        
+        int row = ptrb[i];
+        int col = indx[i];
+        float val_ij = val[i];
+
+        float temp = 0.0f;
+        for (int j = threadIdx.x; j < k; j += blockDim.x) {
+	    temp += val_ij * b[col * k + j];
+        }
+        atomicAdd(&c[row * k + threadIdx.x], temp);
+    }
+}
+
+
+void gfusedMM_bl[[blocksize]]_spmm_csr
+(
+   const char tkern,       // kernel variations
+   const INDEXTYPE m,      // rows of A 
+   const INDEXTYPE n,      // rows of B
+   const INDEXTYPE k,      // dimension: col of A and B
+   const VALUETYPE alpha,  // not used yet  
+   const INDEXTYPE nnz,    // nonzeros  
+   const INDEXTYPE rows,   // number of rows for sparse matrix 
+   const INDEXTYPE cols,   // number of columns for sparse matrix 
+   const VALUETYPE *val,   // NNZ value  
+   const INDEXTYPE *indx,  // colids -> column indices 
+   const INDEXTYPE *pntrb, // starting index for rowptr
+   const INDEXTYPE *pntre, // ending index for rowptr
+   const VALUETYPE *a,     // Dense A (X) matrix
+   const INDEXTYPE lda,    // leading dimension of A (col size since A row-major)  
+   const VALUETYPE *b,     // Dense B matrix
+   const INDEXTYPE ldb,    // leading dimension of B (col size since B row-major)  
+   const VALUETYPE beta,   // beta value 
+   VALUETYPE *c,           // Dense matrix c
+   const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
+)
+{
+
+     int nnz_per_block = [[blocksize]];
+     int threads_per_block = 256;
+     int num_blocks = (nnz + nnz_per_block - 1) / nnz_per_block;
+     gcfusedMM_bl[[blocksize]]_spmm_csr<<<num_blocks, threads_per_block>>>(m, n, k, nnz, indx, pntrb, val, b, c, nnz_per_block);
+     cudaDeviceSynchronize();
+
+}

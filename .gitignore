@@ -19,3 +19,4 @@ csrc/fusedmm/*.a
 *.out
 results/
 tests/results/
+.vscode
