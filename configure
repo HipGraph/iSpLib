@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 git clone https://github.com/OnixHoque/FusedMM_Extended.git
 cd ./FusedMM_Extended
-git checkout python_compatible_portable
+git checkout spmm_variant
 sh ./configure
 sh ./generate_shared_object.sh
 cp ./shared_object/libmyfusedmm.a ../csrc/fusedmm/fusedmm_cpu.a
