@@ -6,4 +6,6 @@ sh ./configure
 sh ./generate_shared_object.sh
 cp ./shared_object/libmyfusedmm.a ../csrc/fusedmm/fusedmm_cpu.a
 echo "Configuration complete! Auto-tuned static C library (CPU) has been placed."
-
+cd ../gpu
+make
+cp ./bin/*.a ../csrc/fusedmm/fusedmm_gpu.a
