@@ -5,13 +5,18 @@ all:
 	nvcc -Xcompiler -fPIC -dlink -o $(TEMP_PATH)/temp2.o $(TEMP_PATH)/temp.o -lcudart
 	ar cru ./bin/fusedmm_gpu.a $(TEMP_PATH)/*.o
 	ranlib ./bin/fusedmm_gpu.a
-	g++ timer.cpp -L./bin -l:fusedmm_gpu.a -o timer -L/usr/local/cuda/lib64 -lcudart
-	@echo Static Library created in ./bin. Copy this to iSpLib/csrc/fusedmm and run python3 setup.py develop there.
+	@echo CUDA Static Library created in ./bin. 
+# Copy this to iSpLib/csrc/fusedmm and run python3 setup.py develop there.
+
 codegen:
 	@echo Auto-tuning...
 	python3 ./kernels/codegen.py
 	@echo Done!
-test:
+
+timer:
+	g++ timer.cpp -L./bin -l:fusedmm_gpu.a -o timer -L/usr/local/cuda/lib64 -lcudart
+
+test: timer
 	./timer
 	
 clean:

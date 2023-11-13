@@ -48,7 +48,7 @@ void fusedmm_cuda
   fusedmm_spmm_trusted_kernel(m, n, k, nnz, indx, pntrb, val, b, c);
   // For Cora, best is 102
   // gfusedMM_spmm[102 - 1]('m', m, n, k, 1, nnz, 0, 0,val, indx, pntrb,pntre , 0, 0,  b, 0, 0, c, 0);
-}
+} 
 
 
 auto cuda_spmm_test(int kk)
