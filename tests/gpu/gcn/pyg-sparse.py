@@ -10,15 +10,15 @@ import sklearn.metrics as metrics
 import time
 import numpy as np
 
-import torch_geometric.typing
-torch_geometric.typing.WITH_PT2 = False
-torch_geometric.typing.WITH_PT20 = False
+# import torch_geometric.typing
+# torch_geometric.typing.WITH_PT2 = False
+# torch_geometric.typing.WITH_PT20 = False
   
-from isplib import * 
-iSpLibPlugin.patch_pyg()
+# from isplib import * 
+# iSpLibPlugin.patch_pyg()
 
-EPOCH_COUNT = 5
-EMBEDDING_SIZE = 64
+EPOCH_COUNT = 100
+EMBEDDING_SIZE = 32
 
 from torch_geometric.datasets import Planetoid, Amazon, TUDataset, Reddit
 from torch_geometric.graphgym.loader import load_ogb
@@ -30,7 +30,7 @@ from torch_geometric.nn import SAGEConv
 import numpy as np
 import torch_geometric.transforms as T
 
-device = torch.device('gpu')
+device = torch.device('cuda')
 
 # transform = T.Compose([T.NormalizeFeatures(), T.GCNNorm(), T.ToSparseTensor()]) # poor accuracy for reddit
 # dataset = Reddit(root='./datasets/Reddit', transform=transform) # poor accuracy for reddit
@@ -41,8 +41,8 @@ device = torch.device('gpu')
 
 
 #Reddit and Cora:
-# dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
-dataset = Reddit(root='./datasets/Reddit', transform=T.ToSparseTensor())
+dataset = Planetoid("Planetoid", name="Cora", transform=T.ToSparseTensor())
+# dataset = Reddit(root='./datasets/Reddit', transform=T.ToSparseTensor())
 data = dataset[0].to(device)
 
 #OGB:
@@ -85,14 +85,15 @@ model = Net().to(device)
 # data.adj_t = adj_mat
 # # print(data.adj_t.storage.csr2csc())
 
-
+from tqdm.auto import tqdm
+final_training_accuracy = 0
 train_times = []
 def train_GCN():
-  global train_times
+  global train_times, final_training_accuracy
   optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
   model.train() 
-  for epoch in range(EPOCH_COUNT):
+  for epoch in tqdm(range(EPOCH_COUNT)):
       t = time.time()
       optimizer.zero_grad()
       out = model(data)
@@ -104,15 +105,27 @@ def train_GCN():
       acc = correct / data.train_mask.sum().item()
       t1 = time.time() - t
       train_times += [t1]
-      print('Epoch: %d, Accuracy: %.4f, Time: %.4f'%(epoch,acc, t1))
+      final_training_accuracy = acc
+      # print('Epoch: %d, Accuracy: %.4f, Time: %.4f'%(epoch,acc, t1))
+
+
 
 def test_GCN():
+  global final_training_accuracy
   # print(data.adj_t)
   t = time.time()
   _, pred = model(data).max(dim=1)
   correct = float (pred[data.test_mask].eq(data.y[data.test_mask]).sum().item())
   acc = correct / data.test_mask.sum().item()
-  print('Testing Accuracy: {:.4f}, Time: {:.4f}'.format(acc, time.time() - t))
+  t1 = time.time() - t
+  # print('Testing Accuracy: {:.4f}, Time: {:.4f}'.format(acc, time.time() - t))
+  # print(f'Training time avg: {np.mean(train_times)} std: {np.std(train_times)}')
+  print(f'Final Statistics: [Embedding size = {EMBEDDING_SIZE}, Epoch Count = {EPOCH_COUNT}]')
+  print(f'Training Time Avg = {np.mean(train_times):.4f}',
+        f'Training Time Standard Deviation = {np.std(train_times):.4f}',
+        f'Testing Time = {t1:.4f}',
+        f'Final Training Accuracy = {final_training_accuracy:.4f}',
+        f'Training Accuracy = {acc:.4f}', sep='\n')
 #   return acc
 
 
@@ -136,7 +149,7 @@ from pstats import SortKey
 def run_all():
   print('Embedding Size:', EMBEDDING_SIZE)
   train_GCN()   
-  print(f'Training time avg: {np.mean(train_times)} std: {np.std(train_times)}')
+  # print(f'Training time avg: {np.mean(train_times)} std: {np.std(train_times)}')
   test_GCN()
 
 # cProfile.run('run_all()', sort=SortKey.CUMULATIVE)
