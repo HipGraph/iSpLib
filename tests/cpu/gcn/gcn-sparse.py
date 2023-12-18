@@ -13,11 +13,11 @@ import numpy as np
 import torch_geometric.typing
 torch_geometric.typing.WITH_PT2 = False
 torch_geometric.typing.WITH_PT20 = False
-  
+
 from isplib import * 
 iSpLibPlugin.patch_pyg()
 
-EPOCH_COUNT = 5
+EPOCH_COUNT = 1
 EMBEDDING_SIZE = 64
 
 from torch_geometric.datasets import Planetoid, Amazon, TUDataset, Reddit
