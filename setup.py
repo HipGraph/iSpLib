@@ -124,7 +124,7 @@ def get_extensions():
         if FUSEDMM:
             extra_objects += [f'csrc/fusedmm/{i}' for i in os.listdir('csrc/fusedmm/') if i[-2:] == '.a']
             # extra_objects += ['csrc/fusedmm/fusedmm_cpu.a','csrc/fusedmm/fusedmm_gpu.a']
-            extra_compile_args['cxx'] += ["-O3", "-march=native", "-Wall", "-lm", "-fopenmp"]
+            extra_compile_args['cxx'] += ["-O3", "-march=native", "-Wall", "-lm", "-fopenmp", "-L/usr/local/cuda/lib64", "-lcudart"]
             extra_link_args += ['-lgomp']
             
         Extension = CppExtension if suffix == 'cpu' else CUDAExtension

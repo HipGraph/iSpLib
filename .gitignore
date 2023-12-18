@@ -9,7 +9,7 @@ alpha/
 .idea/
 .vscode/
 tests/datasets
-/datasets
+datasets/
 *.txt
 *.xlsx
 csrc/fusedmm/*.a
@@ -19,3 +19,4 @@ csrc/fusedmm/*.a
 results/
 tests/results/
 .vscode
+*.svg

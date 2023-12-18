@@ -96,6 +96,7 @@ class iSpLibPlugin:
             # print()
             # print('Using FusedMM SpMM...')
             # print(other, reduce)
+            # print(other.shape)
             # # Max
             # a = torch.ops.isplib.fusedmm_spmm_max(rowptr, col, value, other)
             # b = torch.ops.torch_sparse.spmm_max(rowptr, col, value, other)

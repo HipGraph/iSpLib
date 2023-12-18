@@ -84,6 +84,8 @@ int fusedMM_csr
    INDEXTYPE *z_arg
 );
 
+}
+
 void fusedmm_cuda
 (
    const char tkern,       // kernel variations
@@ -106,8 +108,6 @@ void fusedmm_cuda
    VALUETYPE *c,           // Dense matrix c
    const INDEXTYPE ldc     // leading dimension of c (col size since C row-major) 
 );
-
-}
 
 
 std::tuple<torch::Tensor, torch::optional<torch::Tensor>> fusedmm_spmm_fw(torch::Tensor rowptr, torch::Tensor col, torch::optional<torch::Tensor> value, torch::Tensor mat, int reduction = 0)
