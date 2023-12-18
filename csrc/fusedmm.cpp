@@ -49,8 +49,8 @@ PyMODINIT_FUNC PyInit__spmm_cpu(void) { return NULL; }
 #include <chrono>  
 #include <cstdlib>
 
-std::chrono::time_point<std::chrono::system_clock> start;
-std::chrono::duration<double> elapsed_seconds;
+// std::chrono::time_point<std::chrono::system_clock> start;
+// std::chrono::duration<double> elapsed_seconds;
 
 
 #include "fusedMM.h"
@@ -187,19 +187,18 @@ std::tuple<torch::Tensor, torch::optional<torch::Tensor>> fusedmm_spmm_fw(torch:
     // printf("Hello");
     // std::cout << "imsg: " << imsg << std::endl;
     
-	  start = std::chrono::system_clock::now();
+	  // start = std::chrono::system_clock::now();
     if (rowptr.device().is_cuda())
     {
-      std::cout << "Invoking FusedMM CUDA\n" ;
-      const char tkern = 'm';
+      // std::cout << "Invoking FusedMM CUDA\n" ;
+      // const char tkern = 'm';
       fusedmm_cuda(tkern, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc);
     }
     else{
       fusedMM_csr(imsg, M, N, K, alpha, S_nnz, S_rows, S_cols, S_values, S_colids, S_rowptr, S_rowptr + 1, a, lda, b, ldb, beta, c, ldc, c_idx);
     }
 
-    if (std::getenv("FUSEDMM_DEBUG_ALL"))
-      printf("\nFUSEDMM_ONLY: %.8lf\n", elapsed_seconds.count());
+    // if (std::getenv("FUSEDMM_DEBUG_ALL")) printf("\nFUSEDMM_ONLY: %.8lf\n", elapsed_seconds.count());
     return std::make_tuple(out, out_arg);
 }
 
@@ -219,7 +218,7 @@ public:
                                torch::optional<Variable> value_index_select,
                                torch::optional<Variable> row_index_select) {
 
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
 
     if (has_value && torch::autograd::any_variable_requires_grad({value})) {
       AT_ASSERTM(opt_row.has_value(), "Argument `row` is missing");
@@ -250,16 +249,15 @@ public:
     ctx->saved_data["has_value"] = has_value;
     ctx->save_for_backward({row, rowptr, col, value, colptr, csr2csc, mat, value_index_select_, row_index_select_});
     
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_SUM_FW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_SUM_FW: %.8lf\n", elapsed_seconds.count());
     
     return {out};
   }
 
   static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
     
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
 
     auto has_value = ctx->saved_data["has_value"].toBool();
     auto grad_out = grad_outs[0];
@@ -287,9 +285,8 @@ public:
       grad_mat = std::get<0>(fusedmm_spmm_fw(colptr,row_index_select , opt_value, grad_out));
     }
 
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_SUM_BW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_SUM_BW: %.8lf\n", elapsed_seconds.count());
 
     return {Variable(), Variable(), Variable(), grad_value,
             Variable(), Variable(), grad_mat, Variable(), Variable(), Variable()};
@@ -308,7 +305,7 @@ public:
                                torch::optional<Variable> new_row,
                                torch::optional<Variable> new_rowcount) {
                               
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     if (has_value && torch::autograd::any_variable_requires_grad({value})) {
       AT_ASSERTM(opt_row.has_value(), "Argument `row` is missing");
     }
@@ -335,14 +332,13 @@ public:
     ctx->saved_data["has_value"] = has_value;
     ctx->save_for_backward({row, rowptr, col, value, rowcount, colptr, csr2csc, mat, new_row.value(), new_rowcount.value()});
     
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MEAN_FW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MEAN_FW: %.8lf\n", elapsed_seconds.count());
     return {out};
   }
 
   static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     auto has_value = ctx->saved_data["has_value"].toBool();
     auto grad_out = grad_outs[0];
     auto saved = ctx->get_saved_variables();
@@ -379,9 +375,8 @@ public:
       grad_mat = std::get<0>(fusedmm_spmm_fw(colptr, new_row, new_rowcount, grad_out)); //sum
     }
     
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MEAN_BW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MEAN_BW: %.8lf\n", elapsed_seconds.count());
 
     return {Variable(), Variable(), Variable(), grad_value, Variable(),
             Variable(), Variable(), grad_mat,   Variable(), Variable(), Variable()};
@@ -394,7 +389,7 @@ public:
                                Variable col, Variable value, Variable mat,
                                bool has_value) {
 
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     torch::optional<torch::Tensor> opt_value = torch::nullopt;
     if (has_value)
       opt_value = value;
@@ -407,14 +402,13 @@ public:
     ctx->save_for_backward({col, value, mat, arg_out});
     ctx->mark_non_differentiable({arg_out});
 
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MAX_FW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MAX_FW: %.8lf\n", elapsed_seconds.count());
     return {out, arg_out};
   }
 
   static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     auto has_value = ctx->saved_data["has_value"].toBool();
     auto grad_out = grad_outs[0];
     auto saved = ctx->get_saved_variables();
@@ -451,9 +445,8 @@ public:
       grad_mat.scatter_add_(-2, ind, value);
     }
     
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MAX_BW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MAX_BW: %.8lf\n", elapsed_seconds.count());
     return {Variable(), Variable(), grad_value, grad_mat, Variable()};
   }
 };
@@ -464,7 +457,7 @@ public:
                                Variable col, Variable value, Variable mat,
                                bool has_value) {
 
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     torch::optional<torch::Tensor> opt_value = torch::nullopt;
     if (has_value)
       opt_value = value;
@@ -476,14 +469,13 @@ public:
     ctx->save_for_backward({col, value, mat, arg_out});
     ctx->mark_non_differentiable({arg_out});
     
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MIN_FW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MIN_FW: %.8lf\n", elapsed_seconds.count());
     return {out, arg_out};
   }
 
   static variable_list backward(AutogradContext *ctx, variable_list grad_outs) {
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
     auto has_value = ctx->saved_data["has_value"].toBool();
     auto grad_out = grad_outs[0];
     auto saved = ctx->get_saved_variables();
@@ -519,9 +511,8 @@ public:
       grad_mat = torch::zeros_like(mat);
       grad_mat.scatter_add_(-2, ind, value);
     }
-    elapsed_seconds = std::chrono::system_clock::now() - start;
-    if (std::getenv("FUSEDMM_DEBUG"))
-      printf("\nFUSEDMM_SPMM_MIN_BW: %.8lf\n", elapsed_seconds.count());
+    // elapsed_seconds = std::chrono::system_clock::now() - start;
+    // if (std::getenv("FUSEDMM_DEBUG")) printf("\nFUSEDMM_SPMM_MIN_BW: %.8lf\n", elapsed_seconds.count());
     return {Variable(), Variable(), grad_value, grad_mat, Variable()};
   }
 };

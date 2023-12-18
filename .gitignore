@@ -10,6 +10,7 @@ alpha/
 .vscode/
 tests/datasets
 datasets/
+**/datasets
 *.txt
 *.xlsx
 csrc/fusedmm/*.a
@@ -20,3 +21,7 @@ results/
 tests/results/
 .vscode
 *.svg
+FusedMM_Extended/
+*.a
+*.o
+**/Planetoid/
