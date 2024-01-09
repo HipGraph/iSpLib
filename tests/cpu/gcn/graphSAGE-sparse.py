@@ -19,9 +19,8 @@ import torch_geometric.typing
 torch_geometric.typing.WITH_PT2 = False
 torch_geometric.typing.WITH_PT20 = False
 
-from isplib import * 
-iSpLibPlugin.patch_pyg()
-
+# from isplib import * 
+# iSpLibPlugin.patch_pyg()
 
 EPOCH_COUNT = 10
 EMBEDDING_SIZE = 64
@@ -48,6 +47,7 @@ from torch_geometric.nn import GCNConv
 from torch_geometric.nn import SAGEConv
 # from isplib.tensor import SparseTensor
 
+# Scale (NN)
 class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -66,12 +66,26 @@ class Net(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
-
-
-
+# Truncate
 class Net0(torch.nn.Module):
     def __init__(self):
         super(Net0, self).__init__()
+        self.conv1 = SAGEConv(592, EMBEDDING_SIZE, cached=True, aggr='sum')
+        self.conv2 = SAGEConv(EMBEDDING_SIZE, dataset.num_classes, cached=True, aggr='sum')
+
+    def forward(self, data):
+        x, adj_t = data.x, data.adj_t
+        x = self.conv1(x[:,:592], adj_t)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        x = self.conv2(x, adj_t)
+
+        return F.log_softmax(x, dim=1)
+
+# Original
+class Net00(torch.nn.Module):
+    def __init__(self):
+        super(Net00, self).__init__()
         self.conv1 = SAGEConv(dataset.num_node_features, EMBEDDING_SIZE, cached=True, aggr='sum')
         self.conv2 = SAGEConv(EMBEDDING_SIZE, dataset.num_classes, cached=True, aggr='sum')
 
@@ -84,10 +98,29 @@ class Net0(torch.nn.Module):
 
         return F.log_softmax(x, dim=1)
 
+# Padding
+class Net000(torch.nn.Module):
+    def __init__(self):
+        super(Net000, self).__init__()
+        self.conv1 = SAGEConv(608, EMBEDDING_SIZE, cached=True, aggr='sum')
+        self.conv2 = SAGEConv(EMBEDDING_SIZE, dataset.num_classes, cached=True, aggr='sum')
+
+    def forward(self, data):
+        x, adj_t = data.x, data.adj_t
+        x = self.conv1(x, adj_t)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        x = self.conv2(x, adj_t)
+
+        return F.log_softmax(x, dim=1)
 
 device = torch.device('cpu')
-model = Net().to(device)
+model = Net000().to(device)
 data = dataset[0].to(device)
+
+# Uncomment if Net000 (Pad)
+row_size, _ = data.x.shape
+data.x = torch.tensor(np.concatenate((data.x, torch.tensor(np.zeros((row_size, 6), dtype=np.float16), device=data.x.device)), axis=1))
 
 train_times = []
 def train_GCN():

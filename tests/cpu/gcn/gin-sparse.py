@@ -78,7 +78,7 @@ def masked_accuracy(output, target, mask):
     return correct / mask.sum().item()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = GINNet().to(device)
+model = GINNet0().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 print('Embedding Size: ', EMBEDDING_SIZE)
