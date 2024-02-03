@@ -17,10 +17,14 @@ def load_reddit(path='../datasets', device='cpu', adj_t=True):
 
 
 def load_reddit2(path='../datasets', device='cpu', adj_t=True):
-    if adj_t:
-        dataset = Reddit2(root=f'{path}/Reddit2', transform=T.ToSparseTensor())
-    else:
-        dataset = Reddit2(root=f'{path}/Reddit2')
+    try:
+        if adj_t:
+            dataset = Reddit2(root=f'{path}/Reddit2', transform=T.ToSparseTensor())
+        else:
+            dataset = Reddit2(root=f'{path}/Reddit2')
+    except Exception:
+        print('Error! [Action Required] Please download the four files manually  from the link shown in the console (Google Drive link) and replace them in ../datasets/Reddit2/raw/ and try again')
+        exit()
     data = dataset[0].to(device)
     dataset.num_node_features_ = dataset.num_node_features
     dataset.num_classes_ = dataset.num_classes
@@ -58,18 +62,23 @@ def load_ogbn_mag(path='../datasets', device='cpu', adj_t=True):
 
 
 def load_amazon_products(path='../datasets', device='cpu', adj_t=True):
-    if adj_t:
-        dataset = AmazonProducts(root=f'{path}/AmazonProducts', transform=T.ToSparseTensor())
-    else:
-        dataset = AmazonProducts(root=f'{path}/AmazonProducts')
+    try:
+        if adj_t:
+            dataset = AmazonProducts(root=f'{path}/AmazonProducts', transform=T.ToSparseTensor())
+        else:
+            dataset = AmazonProducts(root=f'{path}/AmazonProducts')
+    except Exception:
+        print('Error! [Action Required] Please download the four files manually from the link shown in the console (Google Drive link) and replace them in ../datasets/Reddit2/raw/ and try again')
+        exit()
+
     data = dataset[0].to(device)
 
-    # data.y = data.y.sum(axis=1)
-    data.y = data.y[:,0]
+    data.y = data.y.sum(axis=1)
+    # data.y = data.y[:,0]
     dataset.num_node_features_ = data.x.shape[1]
     # dataset.num_classes_ = dataset.num_classes
-    # dataset.num_classes_ = len(set({int(i) for i in data.y}))
-    dataset.num_classes_ = 2
+    dataset.num_classes_ = len(set({int(i) for i in data.y}))
+    # dataset.num_classes_ = 2
 
     return dataset, data
 
@@ -105,8 +114,8 @@ def load_ogbn_protein(path='../datasets', device='cpu', adj_t=True):
     dataset = PygNodePropPredDataset(name='ogbn-proteins', root=f'{path}/ogbn-proteins')
     data = dataset[0].to(device)
     
-    # data.y = data.y.sum(axis=1)
-    data.y = data.y[:,0]
+    data.y = data.y.sum(axis=1)
+    # data.y = data.y[:,0]
 
     N = data.num_nodes
 
@@ -128,8 +137,8 @@ def load_ogbn_protein(path='../datasets', device='cpu', adj_t=True):
     if adj_t:
         data = T.ToSparseTensor()(data)
         
-    # dataset.num_classes_ = len(set({int(i) for i in data.y}))
-    dataset.num_classes_ = 2
+    dataset.num_classes_ = len(set({int(i) for i in data.y}))
+    # dataset.num_classes_ = 2
     return dataset, data
 
 

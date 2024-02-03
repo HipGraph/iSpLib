@@ -1,7 +1,7 @@
 # python graphSAGE-compile.py reddit
 # python graphSAGE-compile.py reddit compile
 
-EPOCH_COUNT = 2
+EPOCH_COUNT = 50
 EMBEDDING_SIZE = 32
 
 PRINT_TABLE = False

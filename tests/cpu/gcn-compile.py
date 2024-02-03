@@ -1,10 +1,10 @@
 # python gcn-compile.py reddit
 # python gcn-compile.py reddit compile
 
-EPOCH_COUNT = 10
+EPOCH_COUNT = 50
 EMBEDDING_SIZE = 32
 
-PRINT_TABLE = True
+PRINT_TABLE = False
 
 from tqdm import tqdm
 import torch
