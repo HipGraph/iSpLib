@@ -19,7 +19,8 @@ EMBEDDING_SIZE = 32
 EPOCH_COUNT = 10
 scaling_factor = 2
 
-dataset = Reddit(root='./datasets/Reddit', transform=ToSparseTensor())
+
+dataset = Reddit(root='../datasets/Reddit', transform=ToSparseTensor())
 data = dataset[0]  # Get the first graph object.
 data = data.to('cpu')
 
@@ -49,7 +50,7 @@ class GINNet(torch.nn.Module):
 
 class GINNet0(torch.nn.Module):
     def __init__(self):
-        super(GINNet, self).__init__()
+        super(GINNet0, self).__init__()
         nn1 = Sequential(Linear(dataset.num_features, EMBEDDING_SIZE), ReLU(), Linear(EMBEDDING_SIZE, EMBEDDING_SIZE))
         self.conv1 = GINConv(nn1)
         self.bn1 = torch.nn.BatchNorm1d(EMBEDDING_SIZE)
@@ -77,7 +78,8 @@ def masked_accuracy(output, target, mask):
     correct = (predictions[mask] == target[mask]).sum().item()
     return correct / mask.sum().item()
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 model = GINNet0().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 

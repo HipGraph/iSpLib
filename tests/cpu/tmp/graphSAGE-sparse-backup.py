@@ -119,8 +119,8 @@ model = Net000().to(device)
 data = dataset[0].to(device)
 
 # Uncomment if Net000 (Pad)
-row_size, _ = data.x.shape
-data.x = torch.tensor(np.concatenate((data.x, torch.tensor(np.zeros((row_size, 6), dtype=np.float16), device=data.x.device)), axis=1))
+# row_size, _ = data.x.shape
+# data.x = torch.tensor(np.concatenate((data.x, torch.tensor(np.zeros((row_size, 6), dtype=np.float16), device=data.x.device)), axis=1))
 
 train_times = []
 def train_GCN():
