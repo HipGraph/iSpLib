@@ -2,17 +2,17 @@
 
 # ^[0-9.]*\t.* Ctrl+Shift+L
 
-# for i in amazon reddit protein reddit2 product mag; do
-#     for j in pt2 pt1 isplib; do
-#         python gcn-sparse.py $i $j >> gcn.txt
-#         python graphSAGE-sparse.py $i $j sum nopad >> graphSAGE-sum-nopad.txt
-#         python graphSAGE-sparse.py $i $j sum >> graphSAGE-sum.txt
-#         python graphSAGE-sparse.py $i $j mean nopad >> graphSAGE-mean-nopad.txt
-#         python gin-sparse.py $i $j >> gin.txt
-#         python gin-sparse.py $i $j nopad >> gin-nopad.txt
-#         # echo "Outer: $i, Inner: $j"
-#     done
-# done
+for i in amazon reddit protein reddit2 product mag; do
+    for j in pt2 pt1 isplib; do
+        python gcn-sparse.py $i $j >> gcn.txt
+        python graphSAGE-sparse.py $i $j sum nopad >> graphSAGE-sum-nopad.txt
+        python graphSAGE-sparse.py $i $j sum >> graphSAGE-sum.txt
+        python graphSAGE-sparse.py $i $j mean nopad >> graphSAGE-mean-nopad.txt
+        python gin-sparse.py $i $j >> gin.txt
+        python gin-sparse.py $i $j nopad >> gin-nopad.txt
+        # echo "Outer: $i, Inner: $j"
+    done
+done
 
 for i in amazon reddit protein reddit2 product mag; do
     python gcn-compile.py $i >> gcn-mp.txt
