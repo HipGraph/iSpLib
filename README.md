@@ -48,7 +48,10 @@ cd ./tests/cpu/
 python gcn-sparse.py reddit isplib
 ```
 
-You can try the following datasets as the first argument: `amazon reddit protein reddit2 product mag`. You can try the following frameworks as the second argument: `pt2 pt1 isplib`.
+- Supported datasets in first argument: `amazon reddit protein reddit2 product mag`. 
+- Supported frameworks in first argument: `pt2 pt1 isplib`.
+- Supported GNNs: gcn-\*.py, graphSAGE-\*.py, gin-\*.py (To see how to run, see at the top of each file)
+- For PT2-MP and PT2-Compile please use \*-compile.py instead of \*-sparse.py.
 
 ## PyTorch Geometric Patch
 [Tested on PyG 2.4.0 and PyTorch 2.1]
