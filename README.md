@@ -48,10 +48,12 @@ cd ./tests/cpu/
 python gcn-sparse.py reddit isplib
 ```
 
+You can try the following datasets as the first argument: `amazon reddit protein reddit2 product mag`. You can try the following frameworks as the second argument: `pt2 pt1 isplib`.
+
 ## PyTorch Geometric Patch
 [Tested on PyG 2.4.0 and PyTorch 2.1]
 
-If you have an existing PyG implementation of a GNN that uses SpMM (dataset has SparseTensor), you can use iSpLib patch function to divert SpMM calls to iSpLib. 
+If you have an existing PyG implementation of a GNN that uses SpMM (i.e., the dataset is in SparseTensor format), you can use iSpLib patch function to divert SpMM calls to iSpLib. 
 
 **Make sure to convert your PyG dataset into TorchSparse format**
 
@@ -135,7 +137,7 @@ def dataset_to_mtx(dataset, filename):
     coo_sci = sparse.coo_matrix((v,(i,j)),shape=(shape[0], shape[1]))
     fmm.mmwrite(filename,coo_sci)
 
-dataset_to_mtx(b, "your_dataset.mtx")
+dataset_to_mtx(your_pyg_dataset, "your_dataset.mtx")
 ```
 
 ## Troubleshoot
