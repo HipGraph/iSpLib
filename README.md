@@ -160,3 +160,5 @@ iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause
 # Acknowledgements
 
 *This work has been funded by grants from the National Science Foundation, including the ICICLE AI Institute (OAC 2112606)*
+
+We extend our appreciation to the PyTorch_Sparse community for open-sourcing their project. Our project has significantly benefited from their coding style and implementation.
