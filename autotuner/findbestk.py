@@ -34,7 +34,7 @@ out = []
 for k in tqdm([16, 32, 64, 128, 256, 512, 1024]):
     a = f'../bin/xsOptFusedMMtime_{kernel}_pt'
     b = f"../dataset/{dataset}.mtx"
-    output = subprocess.check_output([a, "-input", b, "-K", f"{k}", "skHd", "1"]).decode('utf-8')
+    output = subprocess.check_output([a, "-input", b, "-K", f"{k}"]).decode('utf-8')
     out += [output]
     # out += [(float(output.split(',')[-2]), k)]d
 for i in out:
