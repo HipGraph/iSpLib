@@ -1,6 +1,6 @@
 # iSpLib - An Intelligent Sparse Library
 
-iSpLib is an accelerated sparse kernel library with PyTorch interface. This library has an auto-tuner which generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently it has support for CPU-based efficient Sparse Dense Matrix Multiplication (spmm-sum only) with autograd.
+iSpLib is an accelerated sparse kernel library with PyTorch interface. This library has an auto-tuner which generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently it has support for CPU-based efficient Sparse Dense Matrix Multiplication (spmm-sum only) with autograd in Linux environment.
 
 <p align="center"><img src="fusedmm-workflow.png" alt="iSpLib Workflow" width="60%"/></p>
 
@@ -48,8 +48,8 @@ cd ./tests/cpu/
 python gcn-sparse.py reddit isplib
 ```
 
-- Supported datasets in first argument: `amazon reddit protein reddit2 product mag`. 
-- Supported frameworks in first argument: `pt2 pt1 isplib`.
+- Supported datasets in the first argument: `amazon reddit protein reddit2 product mag`. 
+- Supported frameworks in the second argument: `pt2 pt1 isplib`.
 - Supported GNNs: gcn-\*.py, graphSAGE-\*.py, gin-\*.py (To see how to run, see at the top of each file)
 - For PT2-MP and PT2-Compile please use \*-compile.py instead of \*-sparse.py.
 
@@ -80,7 +80,7 @@ import torch_geometric.transforms as T
 dataset = Reddit(root='path/to/reddit', transform=T.ToSparseTensor())
 ```
 
-## SpMM Function
+## Standalone Matmul Function
 
 You can also use the standalone SpMM (matmul) function. The best way to use it is through the torch_sparse's matmul function. **Make sure to convert your PyG dataset into TorchSparse format (See above section for example conversion code)**
 
