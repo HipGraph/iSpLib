@@ -1,5 +1,5 @@
 # iSpLib - An Intelligent Sparse Library
-
+---
 
 iSpLib is an accelerated sparse kernel library with PyTorch interface. This library has an auto-tuner which generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently it has support for CPU-based efficient Sparse Dense Matrix Multiplication (spmm-sum only) with autograd.
 
@@ -14,78 +14,140 @@ Make >= 4.4
 GCC >= 10.1 (Support for C++ >= 14)
 OpenMP >= 4.5
 Python >= 3.7
-NumPy >= 1.21 (Or, Anaconda environment)
+PyTorch >= 2.0
+torch-scatter torch-sparse [PyTorch compatible] 
 ```
 
+### Python Environment Setup
 
-## Installation
+**It is recommended to create a virtual environment**
 
-To install the package, run the following commands:
-
-- `git clone https://github.com/ICICLE-ai/iSpLib.git`: To clone this repository.
-- `./configure`: To download and run the auto-tuner. This is a pre-requisite for the installation.
-- Create a virtualenv as the packages might conflict.
-- Install the dependencies `pip install torch torchvision scikit-learn torch-scatter`.
-- `make`: To install the library.
-- Finally install custom version of torch-geometric `pip install git+https://github.com/gamparohit/pytorch_geometric.git`
-
-## Troubleshoot
-
-- If `make` command exits with unknown error message, try running `pip3 install -e .` instead.
-- If you are having trouble installing torch-scatter, install it with -f flag and torch version. 
+Torch-sparse and torch-scatter should be compatible with current PyTorch version.
 
 ```
 import torch
 print(torch.__version__)
-!pip install torch-scatter -f https://data.pyg.org/whl/torch-{torch.__version__}.html
+!pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-{torch.__version__}.html
 ```
 
-## Convention and Usage
+## Installation
 
-The current iSpLib has both regular and optimized SpMM operation for comparison purpose. The default operation is non-optimized. To use the optimized version, use the following code snippet for running the GNN model:
+To install the iSpLib package, use the follwing steps:
 
 ```
-import builtins
-builtins.FUSEDMM = True
+git clone https://github.com/HipGraph/iSpLib.git
+cd iSpLib
+./configure
+make
 ```
 
-FusedMM method is used as the optimized sparse kernel and it is generated when `./configure` command is run. See details here: [FusedMM Method](https://arxiv.org/abs/2011.06391).
+## Testing
 
-**Note: If you are not using the optimized kernel, you will still have to explicitly mention `builtins.FUSEDMM = False` in the code, otherwise it will raise an error.**
+```
+cd ./tests/cpu/
+python gcn-sparse.py reddit isplib
+```
+
+
+
+## PyTorch Geometric Patch
+[Supported up to version PyG 2.4.0 and tested on PyTorch 2.0 to 2.1]
+
+If you have an existing PyG implementation of a GNN that uses SpMM, you can use iSpLib patch function to divert SpMM calls to iSpLib. 
+
+**Make sure to convert your PyG dataset into TorchSparse format**
+
+Example:
+```
+from torch_geometric.datasets import Reddit
+import torch_geometric.transforms as T
+
+dataset = Reddit(root='path/to/reddit', transform=T.ToSparseTensor())
+```
+
+To patch, use the following two lines at the top of your implementation:
+
+```
+from isplib import * 
+iSpLibPlugin.patch_pyg()
+
+# beginning of the rest of your PyG code
+
+```
+
+To unpatch, use `iSpLibPlugin.unpatch_pyg()`. You can also use the decorator function `@isplib_autotune` to patch any specific function.
+
+## SpMM Function
+
+You can also use the standalone SpMM (matmul) function. The best way to use it through torch_sparse. **Make sure to convert your PyG dataset into TorchSparse format (See above section for example conversion code)**
+
+```
+from isplib import * 
+iSpLibPlugin.patch_pyg()
+import torch_sparse
+
+# ...
+torch_sparse.matmul(A, B, 'sum') 
+
+# A = Sparse Matrix in SparseTensor format from torch_sparse
+# B = Dense Matrix, 2-d PyTorch tensor
+# aggr = 'sum', 'mean', 'max', or 'min'; default = 'sum'
+
+```
+
+## Autotuning
+
+iSpLib's autotuner can suggest the best possible embedding size (K value) for your graph dataset. You'll need to have your graph adj_matrix into mtx format. In order to perform autotuning, use the following commands:
+
+```
+cd autotuner
+git clone https://github.com/HipGraph/FusedMM.git
+cd FusedMM/
+./configure
+make
+# Now copy your dataset mtx file into ./autotuner/FusedMM/dataset folder
+cp ../findbestk.py ./test/
+cd ./test
+python findbestk.py your_mtx_filename > autotune.txt
+```
+The autotune.txt will have a table showing the speedups for different embedding sizes (K). You can choose the best K based on the highest speedup.
+
+### Converting a PyG dataset to mtx format 
+In order to generate tuning graph, first convert your graph's adj_matrix into mtx format. 
+
+Sample code to generate mtx file:
+```
+# A fast mtx generater:
+# !pip install fast_matrix_market
+
+
+import scipy.sparse as sparse
+import fast_matrix_market as fmm
+
+# Here dataset is a PyG dataset with SparseTensor. 
+# See above section for example conversion code.
+def dataset_to_mtx(dataset, filename):
+    coo = dataset.adj_t.to_torch_sparse_coo_tensor()
+    coo = coo.coalesce()
+    i = coo.indices()[0] 
+    j = coo.indices()[1]
+    v = coo.values()
+    shape = coo.size()
+    coo_sci = sparse.coo_matrix((v,(i,j)),shape=(shape[0], shape[1]))
+    fmm.mmwrite(filename,coo_sci)
+
+
+dataset_to_mtx(b, "your_dataset.mtx")
+```
+
+## Troubleshoot
+
+- If `make` command exits with unknown error message, try running `pip3 install -e .` instead.
+- Common installation errors can be avoided by making sure that PyTorch version is compatible with current CUDA version (if any).
 
 ## Performance and Testing
 
-When compared to PyTorch Sparse, a 2-layer GCN implemention with 10 epochs is typically-
-
-- **2.5x** faster on Cora dataset
-- **2x** faster on Reddit dataset
-
-[Note: The speed-up varies largly depending on the system condition]
-
-To run the test code, use the command: `make test`. This runs the python script in `tests/GCN.py` and prints out the speed-up along with the accuracy. See `tests/Expected_GCN_output.txt` for reference.
-
-### SpMM Example
-
-The SpMM operation can also be used directly to multiply two compatible matrices. Following is an example of a sparse and dense matrix multiplication:
-
-```
-import builtins
-from isplib.matmul import *
-from isplib.tensor import SparseTensor
-from scipy.sparse import coo_matrix
-import torch 
-
-index = torch.tensor([[0, 0, 1, 2, 2],
-                      [0, 2, 1, 0, 1]])
-value = torch.Tensor([1, 2, 4, 1, 3])
-matrix = torch.Tensor([[90, 4], [2, 5], [3, 6]])
-
-a = SparseTensor.from_scipy(coo_matrix((value, index), shape=(3, 3)))
-b = matrix
-builtins.FUSEDMM = True
-print(spmm_sum(a, b))
-```
-
+We observed significant performance improvements when iSpLib was integrated with PyG, resulting in a GNN training speedup of up to 27x for GCN, 12x for GraphSAGE-sum, 8x for GraphSAGE-mean, and 18x for Graph Isomorphism Network (GIN).
 
 ## License
 iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause

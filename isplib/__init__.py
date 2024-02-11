@@ -6,7 +6,11 @@ import torch
 import torch_sparse
 
 from torch_sparse import SparseTensor, matmul
-import torch_geometric.typing
+
+try:
+	import torch_geometric.typing
+except Exception:
+	pass
 
 __version__ = '0.2.0'
 
@@ -139,7 +143,21 @@ class iSpLibPlugin:
 				return None
 			
 			return out
-			
+		
+		try:
+			try:
+				iSpLibPlugin.cache['WITH_PT2'] = torch_geometric.typing.WITH_PT2
+			except Exception:
+				pass
+			try:
+				iSpLibPlugin.cache['WITH_PT20'] = torch_geometric.typing.WITH_PT20
+			except Exception:
+				pass
+			torch_geometric.typing.WITH_PT2 = False
+			torch_geometric.typing.WITH_PT20 = False
+		except Exception:
+			pass
+		
 		iSpLibPlugin.backup.append(torch_sparse.matmul)
 		iSpLibPlugin.backup.append(torch.sparse.mm)
 		# iSpLibPlugin.backup.append(torch_geometric.typing.WITH_PT2)
@@ -163,6 +181,12 @@ class iSpLibPlugin:
 		#   torch_geometric.typing.WITH_PT2 = iSpLibPlugin.backup.pop()
 			torch.sparse.mm = iSpLibPlugin.backup.pop()
 			torch_sparse.matmul = iSpLibPlugin.backup.pop()
+
+			try:
+				torch_geometric.typing.WITH_PT2 = iSpLibPlugin.cache['WITH_PT2']
+				torch_geometric.typing.WITH_PT20 = iSpLibPlugin.cache['WITH_PT20']
+			except Exception:
+				pass
 		#   print('<< Autotuner deactivated')
 
 def isplib_autotune(fn):

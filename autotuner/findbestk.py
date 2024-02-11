@@ -1,7 +1,7 @@
 import subprocess
 import sys
 from tqdm import tqdm
-# dataset = sys.argv[1]
+dataset = sys.argv[1]
 # kernel = sys.argv[2]
 kernel = 'spmm'
 
@@ -28,21 +28,21 @@ kernel = 'spmm'
 
 # for k in tqdm(range(16, 513, 16)):
 # for k in tqdm([64]):
-for dataset in ['amazon_products', 'ogbn_mag', 'ogbn_protein', 'reddit', 'ogbn_product', 'reddit2']:
-    print(f'==For dataset: {dataset}===')
-    out = []
-    for k in tqdm([16, 32, 64, 128, 256, 512, 1024]):
-        a = f'../bin/xsOptFusedMMtime_{kernel}_pt'
-        b = f"../dataset/{dataset}.mtx"
-        output = subprocess.check_output([a, "-input", b, "-K", f"{k}", "skHd", "1"]).decode('utf-8')
-        out += [output]
-        # out += [(float(output.split(',')[-2]), k)]d
-    for i in out:
-        print(i, end='')
-    
-    print('======')
-    print('')
-    print('')
+# for dataset in ['amazon_products', 'ogbn_mag', 'ogbn_protein', 'reddit', 'ogbn_product', 'reddit2']:
+print(f'==For dataset: {dataset}===')
+out = []
+for k in tqdm([16, 32, 64, 128, 256, 512, 1024]):
+    a = f'../bin/xsOptFusedMMtime_{kernel}_pt'
+    b = f"../dataset/{dataset}.mtx"
+    output = subprocess.check_output([a, "-input", b, "-K", f"{k}", "skHd", "1"]).decode('utf-8')
+    out += [output]
+    # out += [(float(output.split(',')[-2]), k)]d
+for i in out:
+    print(i, end='')
+
+print('======')
+print('')
+print('')
 
 
 # python findbestk.py ogbn-prot spmm > log/out_ogbn-prot_spmm.txt

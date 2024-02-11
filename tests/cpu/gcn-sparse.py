@@ -1,6 +1,6 @@
 # python gcn-sparse.py reddit isplib
 
-EPOCH_COUNT = 100
+EPOCH_COUNT = 2
 EMBEDDING_SIZE = 32
 
 PRINT_TABLE = False
@@ -26,7 +26,7 @@ if len(sys.argv) < 2:
    print('Required 2 arguments: dataset and mode (pt2, pt1, or isplib)')
    exit()
 
-if sys.argv[2] in ['pt1', 'isplib']:
+if sys.argv[2] in ['pt1']:
   import torch_geometric.typing
   torch_geometric.typing.WITH_PT2 = False
   torch_geometric.typing.WITH_PT20 = False
@@ -34,7 +34,6 @@ if sys.argv[2] in ['pt1', 'isplib']:
 if sys.argv[2] == 'isplib':
   from isplib import * 
   iSpLibPlugin.patch_pyg()
-
 
 
 print(f'Running GCN, Epoch: {EPOCH_COUNT}, Embedding: {EMBEDDING_SIZE}, Dataset: {sys.argv[1]}, Mode: {sys.argv[2]}')
@@ -128,3 +127,5 @@ def run_all():
   print()
 
 run_all()
+
+iSpLibPlugin.unpatch_pyg()
