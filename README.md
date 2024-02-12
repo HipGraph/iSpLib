@@ -154,6 +154,10 @@ dataset_to_mtx(your_pyg_dataset, "your_dataset.mtx")
 
 We observed significant performance improvements when iSpLib was integrated with PyG 2.4.0, resulting in a GNN training speedup of up to 27x for GCN, 12x for GraphSAGE-sum, 8x for GraphSAGE-mean, and 18x for Graph Isomorphism Network (GIN).
 
+## Bug Report/Comments
+
+iSpLib is an ongoing project and the functionalities are still experimental. Please share your comments/report bugs at mdshoque AT iu DOT edu.
+
 ## License
 iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause
 
