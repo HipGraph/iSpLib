@@ -82,20 +82,43 @@ dataset = Reddit(root='path/to/reddit', transform=T.ToSparseTensor())
 
 ## Standalone Matmul Function
 
-You can also use the standalone SpMM (matmul) function. The best way to use it is through the torch_sparse's matmul function. **Make sure to convert your PyG dataset into TorchSparse format (See above section for example conversion code)**
+You can also use the standalone SpMM (matmul) function from iSpLib. The best way to use it is through the torch_sparse's matmul function.
 
 Example code to use matmul (SpMM):
 ```
+import torch
+# print(torch.__version__)
+!pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-{torch.__version__}.html
+
 from isplib import * 
 iSpLibPlugin.patch_pyg()
 import torch_sparse
+from torch_sparse import SparseTensor
 
-# ...
-torch_sparse.matmul(A, B, 'sum') 
+# adj_t
+# tensor([[-2,  0,  2],
+#         [ 4,  0,  0],
+#         [ 0,  3,  0]])
 
-# A = Sparse Matrix in SparseTensor format from torch_sparse
-# B = Dense Matrix, 2-d PyTorch tensor
+adj_t = SparseTensor(
+    row=torch.tensor([2, 0, 1, 0, 0], dtype=torch.int64),
+    col=torch.tensor([1, 0, 0, 2, 0], dtype=torch.int64),
+    value=torch.tensor([3, 3, 4, 2, -2], dtype=torch.float32),
+    sparse_sizes=(3, 3)
+)
+
+# tensor([[1, 0, 2],
+#         [4, 0, 0],
+#         [0, 3, 0]])
+
+dense = torch.tensor([[1, 0, 2], [4, 0, 0], [0, 3, 0]], dtype=torch.float32)
+
+torch_sparse.matmul(adj_t, dense)
+
+# adj_t = Sparse Matrix in SparseTensor format from torch_sparse
+# dense = Dense Matrix, 2-d PyTorch tensor
 # aggr = 'sum', 'mean', 'max', or 'min'; default = 'sum'
+# Type of index= int64, Type of value = float32
 
 ```
 
