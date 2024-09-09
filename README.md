@@ -1,6 +1,8 @@
+This is the official implementation of the iSpLib library accepted for publication in Companion Proceedings of the ACM on Web Conference 2024 titled "iSpLib: A Library for Accelerating Graph Neural Networks using Auto-tuned Sparse Operations". [PDF](https://arxiv.org/pdf/2403.14853)
+
 # iSpLib - An Intelligent Sparse Library
 
-iSpLib is an accelerated sparse kernel library with PyTorch interface. This library has an auto-tuner which generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently it has support for CPU-based efficient Sparse Dense Matrix Multiplication (SpMM sum, mean, max, min) with autograd in Linux environment.
+iSpLib is an accelerated sparse kernel library with a PyTorch interface. This library has an auto-tuner that generates optimized custom sparse kernels based on the user environment. The goal of this library is to provide efficient sparse operations for Graph Neural Network implementations. Currently, it has support for CPU-based efficient Sparse Dense Matrix Multiplication (SpMM sum, mean, max, min) with autograd in Linux environment.
 
 <p align="center"><img src="fusedmm-workflow.png" alt="iSpLib Workflow" width="60%"/></p>
 
@@ -180,6 +182,18 @@ We observed significant performance improvements when iSpLib was integrated with
 ## Bug Report/Comments
 
 iSpLib is an ongoing project and the functionalities are still experimental. Please share your comments/report bugs at mdshoque AT iu DOT edu.
+
+## Citation
+
+If you find this repository helpful, please cite the following paper:
+
+    @inproceedings{hoque2024isplib,
+      title={iSpLib: A Library for Accelerating Graph Neural Networks using Auto-tuned Sparse Operations},
+      author={Hoque Anik, Md Saidul and Badhe, Pranav and Gampa, Rohit and Azad, Ariful},
+      booktitle={Companion Proceedings of the ACM on Web Conference 2024},
+      pages={778--781},
+      year={2024}
+    }
 
 ## License
 iSpLib is licensed under the https://opensource.org/licenses/BSD-3-Clause
