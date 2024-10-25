@@ -1,5 +1,5 @@
 all:
-	pip install -e .
+	pip install .
 
 test:
 	python3 ./tests/GCN.py
